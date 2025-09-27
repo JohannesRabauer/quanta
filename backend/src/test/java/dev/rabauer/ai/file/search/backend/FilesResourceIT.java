@@ -1,8 +1,8 @@
-package org.acme;
+package dev.rabauer.ai.file.search.backend;
 
 import io.quarkus.test.junit.QuarkusIntegrationTest;
 
 @QuarkusIntegrationTest
-class GreetingResourceIT extends GreetingResourceTest {
+class FilesResourceIT extends FilesResourceTest {
     // Execute the same tests but in packaged mode.
 }
