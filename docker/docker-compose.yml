@@ -1,0 +1,38 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-ai-file-search
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./ollama-data:/root/.ollama
+      - ./init:/init
+    environment:
+      - OLLAMA_KEEP_ALIVE=-1
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+    entrypoint: [ "/bin/sh", "/init/run_ollama.sh" ]
+
+  db:
+    image: postgres:latest
+    container_name: db-ai-file-search
+    ports:
+      - 15432:5432
+    environment:
+      - POSTGRES_USER=webapp
+      - POSTGRES_PASSWORD=not-secure
+      - POSTGRES_DB=ai-file-search
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - ./db-data/:/var/lib/postgresql/data/
+
+volumes:
+  ollama-data:
+    name: ollama-data
+  db-data:
+    name: db-data
