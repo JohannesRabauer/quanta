@@ -1,4 +1,4 @@
-package dev.rabauer.ai.file.search.backend;
+package dev.rabauer.quanta.backend;
 
 public record FileMetadata(
         String name,

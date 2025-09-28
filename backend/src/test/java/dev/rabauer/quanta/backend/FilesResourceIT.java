@@ -1,4 +1,4 @@
-package dev.rabauer.ai.file.search.backend;
+package dev.rabauer.quanta.backend;
 
 import io.quarkus.test.junit.QuarkusIntegrationTest;
 

@@ -3,7 +3,7 @@
     <img src="./resources/logoTitle.png">
 </p>
 
-# ai-file-search
+# Quanta (ai-file-search)
 
 ## 🏗️ System Architecture
 
