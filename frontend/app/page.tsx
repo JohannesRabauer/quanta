@@ -42,6 +42,14 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-900 to-black p-4">
       <div className="w-[90%] max-w-md mx-auto pt-12">
+        <div className="flex justify-center mb-2">
+          <img 
+            src="/logo.png" 
+            alt="AI Owl Logo" 
+            style={{ width: '62px', height: '62px', filter: 'invert(1) hue-rotate(180deg) drop-shadow(0 0 10px #00ffff)' }}
+            className="opacity-90 hover:opacity-100 transition-opacity"
+          />
+        </div>
         <h1 className="text-3xl md:text-4xl font-bold text-center mb-8 text-cyan-400 tracking-wider">
           AI File Search
         </h1>
