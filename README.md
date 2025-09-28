@@ -1,3 +1,8 @@
+
+<p align="center">
+    <img src="./resources/logoTitle.png">
+</p>
+
 # ai-file-search
 
 ## 🏗️ System Architecture
