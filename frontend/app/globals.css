@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --neon-cyan: #0ff;
+  --neon-purple: #f0f;
+  --dark-bg: #0a0a0f;
+}
+
+body {
+  background-color: var(--dark-bg);
+  color: var(--neon-cyan);
+  min-height: 100vh;
+}
+
+.search-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--neon-cyan);
+  color: white;
+  box-shadow: 0 0 10px var(--neon-cyan);
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  box-shadow: 0 0 20px var(--neon-cyan);
+  border-color: white;
+  outline: none;
+}
+
+.search-button {
+  background: var(--neon-cyan);
+  color: var(--dark-bg);
+  transition: all 0.3s ease;
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+}
+
+.search-button:hover {
+  background: white;
+  box-shadow: 0 0 20px var(--neon-cyan);
+  transform: translateY(-2px);
+}
+
+.result-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.result-card:hover {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.loading-text {
+  animation: pulse 1.5s infinite;
+  color: var(--neon-cyan);
+}
