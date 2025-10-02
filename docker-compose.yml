@@ -5,8 +5,8 @@ services:
     ports:
       - "11434:11434"
     volumes:
-      - ./docker/ollama-data:/root/.ollama
-      - ./docker/ollama-init:/init
+      - ./ollama/data:/root/.ollama
+      - ./ollama/init:/init
     environment:
       - OLLAMA_KEEP_ALIVE=-1
     deploy:
@@ -19,17 +19,20 @@ services:
     entrypoint: [ "/bin/sh", "/init/run_ollama.sh" ]
 
   db:
-    image: postgres:latest
+    build:
+      context: ./db
     container_name: db-quanta
     ports:
       - 15432:5432
     environment:
-      - POSTGRES_USER=webapp
+      - POSTGRES_USER=quanta
       - POSTGRES_PASSWORD=not-secure
       - POSTGRES_DB=quanta
       - POSTGRES_HOST_AUTH_METHOD=trust
+      - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
-      - ./docker/db-data/:/var/lib/postgresql/data/
+      - ./db/data/:/var/lib/postgresql/data/
+      - ./db/init:/docker-entrypoint-initdb.d
 
   backend:
     build:
@@ -44,6 +47,7 @@ services:
       - QUARKUS_DATASOURCE_USERNAME=webapp
       - QUARKUS_DATASOURCE_PASSWORD=not-secure
       - OLLAMA_HOST=http://ollama:11434
+      - QUARKUS_LANGCHAIN4J_OLLAMA_BASE-URL=http://ollama-quanta:11434
     ports:
       - "8080:8080"
 
@@ -51,14 +55,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: frontend
+    container_name: frontend-quanta
     depends_on:
       - backend
     ports:
       - "3000:80"
-
-volumes:
-  ollama-data:
-    name: ollama-data
-  db-data:
-    name: db-data
