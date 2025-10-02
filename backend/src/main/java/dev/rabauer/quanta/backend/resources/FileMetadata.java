@@ -1,4 +1,4 @@
-package dev.rabauer.quanta.backend;
+package dev.rabauer.quanta.backend.resources;
 
 public record FileMetadata(
         String name,

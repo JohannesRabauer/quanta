@@ -3,7 +3,9 @@
 import { useState } from "react";
 
 interface SearchResult {
-  fileName: string;
+  name: string;
+  path: string;
+  hash: string;
   summary: string;
 }
 
@@ -17,12 +19,12 @@ export default function Home() {
     
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:8080/searchFiles", {
+      const response = await fetch("http://backend:8080/searchFiles", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "text/plain",
         },
-        body: JSON.stringify({ query }),
+        body: query,
       });
       const data = await response.json();
       setResults(data);
@@ -86,7 +88,7 @@ export default function Home() {
                 className="result-card p-4 rounded-lg"
               >
                 <h3 className="text-xl font-semibold mb-2 text-cyan-400">
-                  {result.fileName}
+                  {result.name}
                 </h3>
                 <p className="text-gray-300">
                   {result.summary}
