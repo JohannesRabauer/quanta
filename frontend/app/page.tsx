@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-interface SearchResult {
+interface FileMetadata {
   name: string;
   path: string;
   hash: string;
@@ -11,7 +11,7 @@ interface SearchResult {
 
 export default function Home() {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
+  const [results, setResults] = useState<FileMetadata[]>([]);
   const [loading, setLoading] = useState(false);
 
   const handleSearch = async () => {
