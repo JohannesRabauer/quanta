@@ -48,8 +48,11 @@ services:
       - QUARKUS_DATASOURCE_PASSWORD=not-secure
       - OLLAMA_HOST=http://ollama:11434
       - QUARKUS_LANGCHAIN4J_OLLAMA_BASE-URL=http://ollama-quanta:11434
+      - QUANTA_FILESYSTEM_PATH=/app/resources/demo-files
     ports:
       - "8080:8080"
+    volumes:
+      - ./resources/demo-files:/app/resources/demo-files
 
   frontend:
     build:
