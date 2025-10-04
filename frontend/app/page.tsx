@@ -53,22 +53,23 @@ export default function Home() {
           />
         </div>
         <h1 className="text-3xl md:text-4xl font-bold text-center mb-8 text-cyan-400 tracking-wider">
-          AI File Search
+          Quanta - AI File Search
         </h1>
         
-        <div className="relative mb-8">
+        <div className="mb-8 flex items-center gap-2">
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Enter your search query..."
-            className="search-input w-full p-4 text-lg rounded-lg"
+            className="search-input flex-1 p-4 text-lg rounded-lg"
             autoFocus
           />
           <button
             onClick={handleSearch}
-            className="search-button absolute right-2 top-1/2 transform -translate-y-1/2 px-6 py-2 rounded-md font-semibold"
+            className="search-button px-6 py-2 rounded-md font-semibold"
+            aria-label="Search files"
           >
             Search
           </button>

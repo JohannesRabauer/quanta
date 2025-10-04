@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "AI File Search",
+  title: "Quanta - AI File Search",
   description: "Search for files with a futuristic AI interface",
 };
 
@@ -21,7 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
-        <title>AI File Search</title>
+        <title>Quanta - AI File Search</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <style>
           {`
