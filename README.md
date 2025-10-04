@@ -1,4 +1,3 @@
-
 <p align="center">
     <img src="./resources/logoTitle.png">
 </p>
@@ -73,3 +72,21 @@ flowchart TD
 
     Meta -->|Hash exists & unchanged| Skip[Skip processing]
 ```
+
+## 🚀 Quick start
+
+All you need to start the whole system (it will compile the Java backend and the Next.js frontend and start all required services) is:
+
+```powershell
+docker compose up
+```
+
+This will build and run the backend, frontend, database, and the Ollama service defined in `docker-compose.yml`.
+
+If you're actively developing the backend and want to start the other services without building or running the backend container, use the development shortcut:
+
+```powershell
+docker compose up --scale backend=0
+```
+
+This brings up the database, frontend, and Ollama containers while leaving the backend scaled down so you can run the backend locally from your IDE instead of inside Docker.
