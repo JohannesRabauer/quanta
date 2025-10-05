@@ -17,11 +17,16 @@ public class FileMetadata extends PanacheEntityBase {
     @Column(name = "last_modified", nullable = false)
     private Long lastModified;
 
-    public FileMetadata() {}
+    @Column(name = "summary", nullable = true)
+    private String summary;
 
-    public FileMetadata(String path, Long lastModified) {
+    public FileMetadata() {
+    }
+
+    public FileMetadata(String path, Long lastModified, String summary) {
         this.path = path;
         this.lastModified = lastModified;
+        this.summary = summary;
     }
 
     public String getPath() {
@@ -38,5 +43,13 @@ public class FileMetadata extends PanacheEntityBase {
 
     public void setLastModified(Long lastModified) {
         this.lastModified = lastModified;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
     }
 }

@@ -11,14 +11,15 @@ public class FileMetadataRepository implements PanacheRepositoryBase<FileMetadat
         return metadata != null ? metadata.getLastModified() : null;
     }
 
-    public void saveMetadata(String path, Long lastModified) {
-        persist(new FileMetadata(path, lastModified));
+    public void saveMetadata(String path, Long lastModified, String summary) {
+        persist(new FileMetadata(path, lastModified, summary));
     }
 
-    public void updateMetadata(String path, Long lastModified) {
+    public void updateMetadata(String path, Long lastModified, String summary) {
         FileMetadata metadata = findById(path);
         if (metadata != null) {
             metadata.setLastModified(lastModified);
+            metadata.setSummary(summary);
             persist(metadata); // Panache persist merges if entity already managed
         }
     }

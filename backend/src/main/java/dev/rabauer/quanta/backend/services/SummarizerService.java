@@ -7,6 +7,6 @@ import io.quarkiverse.langchain4j.RegisterAiService;
 @RegisterAiService
 public interface SummarizerService {
 
-    @SystemMessage("You are a helpful assistant that summarizes documents.")
-    String summarize(@UserMessage String text);
+    @SystemMessage("You are a helpful assistant that summarizes the content of a document.")
+    String summarize(@UserMessage String content);
 }

@@ -19,7 +19,16 @@ public class FileWatcherService {
 
     private static final Logger LOG = Logger.getLogger(FileWatcherService.class);
     @Inject
-    FileMetadataRepository fileMetadataRepository; // Repository for persisting file metadata
+    FileMetadataRepository fileMetadataRepository;
+
+    @Inject
+    EmbeddingService embeddingService;
+
+    @Inject
+    TextExtractorService textExtractorService;
+
+    @Inject
+    SummarizerService summarizerService;
 
     @ConfigProperty(name = "quanta.filesystem.path")
     private String filesystemPathToWatch;
@@ -46,11 +55,10 @@ public class FileWatcherService {
 
             if (storedTimestamp == null) {
                 // new file, store timestamp
-                fileMetadataRepository.saveMetadata(filePath.toString(), lastModified);
+                fileMetadataRepository.saveMetadata(filePath.toString(), lastModified, null);
                 onFileChanged(filePath, lastModified);
             } else if (storedTimestamp != lastModified) {
                 // file changed
-                fileMetadataRepository.updateMetadata(filePath.toString(), lastModified);
                 onFileChanged(filePath, lastModified);
             } else {
                 LOG.debugf("File unchanged: %s (lastModified=%d)", filePath, lastModified);
@@ -65,6 +73,9 @@ public class FileWatcherService {
      */
     private void onFileChanged(Path filePath, long lastModified) {
         LOG.infof("File changed: %s (lastModified=%d)", filePath, lastModified);
-        // Place your custom business logic here
+        String content = textExtractorService.extractFromFile(filePath);
+        embeddingService.embedFileWithContent(filePath, content);
+        String fileSummary = summarizerService.summarize(content);
+        fileMetadataRepository.updateMetadata(filePath.toString(), lastModified, fileSummary);
     }
 }
