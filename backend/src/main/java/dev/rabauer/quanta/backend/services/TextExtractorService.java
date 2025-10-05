@@ -17,7 +17,7 @@ public class TextExtractorService {
 
     public String extractFromFile(Path filePath) {
         AutoDetectParser parser = new AutoDetectParser();
-        BodyContentHandler handler = new BodyContentHandler();
+        BodyContentHandler handler = new BodyContentHandler(-1);
         Metadata metadata = new Metadata();
         try (InputStream stream = new FileInputStream(filePath.toFile())) {
             parser.parse(stream, handler, metadata);
