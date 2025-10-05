@@ -1,0 +1,25 @@
+package dev.rabauer.quanta.backend.storage;
+
+import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
+import jakarta.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
+public class FileMetadataRepository implements PanacheRepositoryBase<FileMetadata, String> {
+
+    public Long findLastModifiedByPath(String path) {
+        FileMetadata metadata = findById(path);
+        return metadata != null ? metadata.getLastModified() : null;
+    }
+
+    public void saveMetadata(String path, Long lastModified) {
+        persist(new FileMetadata(path, lastModified));
+    }
+
+    public void updateMetadata(String path, Long lastModified) {
+        FileMetadata metadata = findById(path);
+        if (metadata != null) {
+            metadata.setLastModified(lastModified);
+            persist(metadata); // Panache persist merges if entity already managed
+        }
+    }
+}

@@ -43,8 +43,8 @@ services:
       - db
       - ollama
     environment:
-      - QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://db:5432/quanta
-      - QUARKUS_DATASOURCE_USERNAME=webapp
+      - QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://db-quanta:15432/quanta
+      - QUARKUS_DATASOURCE_USERNAME=quanta
       - QUARKUS_DATASOURCE_PASSWORD=not-secure
       - OLLAMA_HOST=http://ollama:11434
       - QUARKUS_LANGCHAIN4J_OLLAMA_BASE-URL=http://ollama-quanta:11434
@@ -62,4 +62,4 @@ services:
     depends_on:
       - backend
     ports:
-      - "3000:3000"
+      - "3001:3000"
