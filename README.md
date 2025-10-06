@@ -4,6 +4,9 @@
 
 # Quanta (ai-file-search)
 
+For a very detailed explanation about this repository, check out
+the [live coding sessions on YouTube](https://www.youtube.com/playlist?list=PLiY7ZRy4r3yYG-MiSm1JrSfVf-OkUozDS).
+
 ## 🏗️ System Architecture
 
 ```mermaid
