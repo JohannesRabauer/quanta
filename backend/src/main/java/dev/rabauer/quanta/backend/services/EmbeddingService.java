@@ -1,6 +1,7 @@
 package dev.rabauer.quanta.backend.services;
 
 import dev.langchain4j.data.embedding.Embedding;
+import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import io.quarkiverse.langchain4j.pgvector.PgVectorEmbeddingStore;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -22,6 +23,6 @@ public class EmbeddingService {
             return;
         }
         Embedding embedding = embeddingModel.embed(content).content();
-        embeddingStore.add(content, embedding);
+        embeddingStore.add(embedding, TextSegment.textSegment(content));
     }
 }

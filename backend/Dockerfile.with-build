@@ -4,11 +4,16 @@ FROM maven:3.9.11-eclipse-temurin-25 AS build
 # Set working directory
 WORKDIR /app
 
+# Copy Maven project files
 COPY pom.xml .
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn dependency:go-offline
+
 COPY src ./src
 
-# Package the application
-RUN mvn package -DskipTests
+# Package the application (skip tests for faster builds)
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn clean package -DskipTests
 
 # Stage 2: Run the application
 FROM eclipse-temurin:25_36-jre-alpine
