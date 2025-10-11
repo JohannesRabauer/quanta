@@ -11,6 +11,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.List;
 
 import static dev.rabauer.quanta.backend.storage.FileMetadata.toAbsoluteFileString;
@@ -24,12 +25,16 @@ public class EmbeddingService {
     @Inject
     PgVectorEmbeddingStore embeddingStore;
 
-    public void embedFileWithContent(Path file, String content) {
+    public void embedFileWithContent(String uuid, Path file, String content) {
         if (content == null || content.isBlank()) {
             return;
         }
         Embedding embedding = embeddingModel.embed(content).content();
-        embeddingStore.add(embedding, TextSegment.textSegment(toAbsoluteFileString(file)));
+        embeddingStore.addAll(
+                List.of(uuid),
+                List.of(embedding),
+                List.of(TextSegment.textSegment(toAbsoluteFileString(file)))
+        );
     }
 
     public List<String> getSimilarFiles(String prompt) {
@@ -44,8 +49,9 @@ public class EmbeddingService {
         return result
                 .matches()
                 .stream()
+                .sorted(Comparator.comparingDouble(EmbeddingMatch::score))
                 .map(EmbeddingMatch::embedded)
                 .map(TextSegment::text)
-                .toList();
+                .toList().reversed();
     }
 }

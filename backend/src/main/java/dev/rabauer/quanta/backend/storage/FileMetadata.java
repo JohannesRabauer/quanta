@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.nio.file.Path;
+import java.util.UUID;
 
 @Entity
 @Table(name = "file_metadata")
@@ -19,7 +20,10 @@ public class FileMetadata extends PanacheEntityBase {
     @Column(name = "last_modified", nullable = false)
     private Long lastModified;
 
-    @Column(name = "summary", nullable = true, length = 2000)
+    @Column(name = "vector_uuid")
+    private String vectorUUID;
+
+    @Column(name = "summary", length = 2000)
     private String summary;
 
     public FileMetadata() {
@@ -29,6 +33,7 @@ public class FileMetadata extends PanacheEntityBase {
         this.path = path;
         this.lastModified = lastModified;
         this.summary = summary;
+        this.vectorUUID = UUID.randomUUID().toString();
     }
 
     public static String toAbsoluteFileString(Path filePath) {
@@ -57,5 +62,13 @@ public class FileMetadata extends PanacheEntityBase {
 
     public void setSummary(String summary) {
         this.summary = summary;
+    }
+
+    public String getVectorUUID() {
+        return vectorUUID;
+    }
+
+    public void setVectorUUID(String vectorUUID) {
+        this.vectorUUID = vectorUUID;
     }
 }

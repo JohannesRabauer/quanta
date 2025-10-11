@@ -1,5 +1,6 @@
 package dev.rabauer.quanta.backend.services;
 
+import dev.rabauer.quanta.backend.storage.FileMetadata;
 import dev.rabauer.quanta.backend.storage.FileMetadataRepository;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -35,8 +36,7 @@ public class FileWatcherService {
     @ConfigProperty(name = "quanta.filesystem.path")
     private String filesystemPathToWatch;
 
-    @Scheduled(every = "600s", delayed = "10s")
-        // runs every 10 minutes, after finishing
+    @Scheduled(every = "600s")
     void checkFiles() {
         Path root = Paths.get(filesystemPathToWatch);
 
@@ -52,11 +52,11 @@ public class FileWatcherService {
     public void processFile(Path filePath) {
         try {
             long lastModified = Files.getLastModifiedTime(filePath).toMillis();
-            Long storedTimestamp = getStoredTimestampAndEnsureMetadata(lastModified, filePath);
+            FileMetadata existingMetadata = ensureMetadata(lastModified, filePath);
 
-            if (storedTimestamp == null || storedTimestamp != lastModified) {
+            if (existingMetadata.getLastModified() != lastModified) {
                 // file changed
-                onFileChanged(filePath, lastModified);
+                onFileChanged(existingMetadata.getVectorUUID(), filePath, lastModified);
             } else {
                 LOG.debugf("File unchanged: %s (lastModified=%d)", filePath, lastModified);
             }
@@ -66,27 +66,28 @@ public class FileWatcherService {
     }
 
     @Transactional
-    public Long getStoredTimestampAndEnsureMetadata(long lastModified, Path filePath) {
-        Long storedTimestamp = fileMetadataRepository.findLastModifiedByPath(filePath.toString());
+    public FileMetadata ensureMetadata(long lastModified, Path filePath) {
+        FileMetadata existingMetadata = fileMetadataRepository.findById(toAbsoluteFileString(filePath));
 
-        if (storedTimestamp == null) {
+        if (existingMetadata == null || existingMetadata.getLastModified() == null) {
             // new file, store timestamp
-            fileMetadataRepository.saveMetadata(filePath.toString(), lastModified, null);
+            return fileMetadataRepository.saveMetadata(filePath.toString(), lastModified - 1, null);
         }
-        return storedTimestamp;
+        return existingMetadata;
     }
 
     /**
      * Called whenever a file has changed or is new.
      */
-    private void onFileChanged(Path filePath, long lastModified) {
+    private void onFileChanged(String uuid, Path filePath, long lastModified) {
         LOG.infof("File changed: %s (lastModified=%d)", filePath, lastModified);
+        String fileSummary = null;
         String content = textExtractorService.extractFromFile(filePath);
         if (content != null && !content.isBlank()) {
-            embeddingService.embedFileWithContent(filePath, content);
-            String fileSummary = summarizerService.summarize(content);
-            updateMetadata(filePath, lastModified, fileSummary);
+            embeddingService.embedFileWithContent(uuid, filePath, content);
+            fileSummary = summarizerService.summarize(content);
         }
+        updateMetadata(filePath, lastModified, fileSummary);
     }
 
     @Transactional
