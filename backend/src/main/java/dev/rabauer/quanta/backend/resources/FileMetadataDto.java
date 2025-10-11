@@ -1,6 +1,6 @@
 package dev.rabauer.quanta.backend.resources;
 
-public record FileMetadata(
+public record FileMetadataDto(
         String name,
         String path,
         String hash,

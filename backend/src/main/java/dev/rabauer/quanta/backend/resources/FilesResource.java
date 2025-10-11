@@ -1,6 +1,7 @@
 package dev.rabauer.quanta.backend.resources;
 
-import jakarta.ws.rs.GET;
+import dev.rabauer.quanta.backend.services.RetrievalService;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -11,19 +12,21 @@ import java.util.List;
 @Path("/")
 public class FilesResource {
 
+    @Inject
+    RetrievalService retrievalService;
+
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/searchFiles")
-    public List<FileMetadata> searchFiles(String prompt) {
-        // TODO
-        return List.of(new FileMetadata("test","sddf","",""));
+    public List<FileMetadataDto> searchFiles(String prompt) {
+        return retrievalService.findFiles(prompt);
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/fileSummary")
-    public FileMetadata getFileSummary(String fileHash) {
+    public FileMetadataDto getFileSummary(String fileHash) {
         // TODO
-        return new FileMetadata("","","","");
+        return new FileMetadataDto("", "", "", "");
     }
 }

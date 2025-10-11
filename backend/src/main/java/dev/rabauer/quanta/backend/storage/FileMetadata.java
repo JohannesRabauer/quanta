@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.nio.file.Path;
+
 @Entity
 @Table(name = "file_metadata")
 public class FileMetadata extends PanacheEntityBase {
@@ -17,7 +19,7 @@ public class FileMetadata extends PanacheEntityBase {
     @Column(name = "last_modified", nullable = false)
     private Long lastModified;
 
-    @Column(name = "summary", nullable = true)
+    @Column(name = "summary", nullable = true, length = 2000)
     private String summary;
 
     public FileMetadata() {
@@ -27,6 +29,10 @@ public class FileMetadata extends PanacheEntityBase {
         this.path = path;
         this.lastModified = lastModified;
         this.summary = summary;
+    }
+
+    public static String toAbsoluteFileString(Path filePath) {
+        return filePath.toAbsolutePath().toString();
     }
 
     public String getPath() {

@@ -14,6 +14,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
+import static dev.rabauer.quanta.backend.storage.FileMetadata.toAbsoluteFileString;
+
 @ApplicationScoped
 public class FileWatcherService {
 
@@ -47,17 +49,12 @@ public class FileWatcherService {
         }
     }
 
-    @Transactional
     public void processFile(Path filePath) {
         try {
             long lastModified = Files.getLastModifiedTime(filePath).toMillis();
-            Long storedTimestamp = fileMetadataRepository.findLastModifiedByPath(filePath.toString());
+            Long storedTimestamp = getStoredTimestampAndEnsureMetadata(lastModified, filePath);
 
-            if (storedTimestamp == null) {
-                // new file, store timestamp
-                fileMetadataRepository.saveMetadata(filePath.toString(), lastModified, null);
-                onFileChanged(filePath, lastModified);
-            } else if (storedTimestamp != lastModified) {
+            if (storedTimestamp == null || storedTimestamp != lastModified) {
                 // file changed
                 onFileChanged(filePath, lastModified);
             } else {
@@ -68,14 +65,32 @@ public class FileWatcherService {
         }
     }
 
+    @Transactional
+    public Long getStoredTimestampAndEnsureMetadata(long lastModified, Path filePath) {
+        Long storedTimestamp = fileMetadataRepository.findLastModifiedByPath(filePath.toString());
+
+        if (storedTimestamp == null) {
+            // new file, store timestamp
+            fileMetadataRepository.saveMetadata(filePath.toString(), lastModified, null);
+        }
+        return storedTimestamp;
+    }
+
     /**
      * Called whenever a file has changed or is new.
      */
     private void onFileChanged(Path filePath, long lastModified) {
         LOG.infof("File changed: %s (lastModified=%d)", filePath, lastModified);
         String content = textExtractorService.extractFromFile(filePath);
-        embeddingService.embedFileWithContent(filePath, content);
-        String fileSummary = summarizerService.summarize(content);
-        fileMetadataRepository.updateMetadata(filePath.toString(), lastModified, fileSummary);
+        if (content != null && !content.isBlank()) {
+            embeddingService.embedFileWithContent(filePath, content);
+            String fileSummary = summarizerService.summarize(content);
+            updateMetadata(filePath, lastModified, fileSummary);
+        }
+    }
+
+    @Transactional
+    public void updateMetadata(Path filePath, long lastModified, String fileSummary) {
+        fileMetadataRepository.updateMetadata(toAbsoluteFileString(filePath), lastModified, fileSummary);
     }
 }
