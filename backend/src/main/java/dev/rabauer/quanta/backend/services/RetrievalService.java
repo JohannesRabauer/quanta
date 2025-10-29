@@ -16,8 +16,8 @@ public class RetrievalService {
     EmbeddingService embeddingService;
 
     public List<FileMetadataDto> findFiles(String prompt) {
-        return embeddingService.
-                getSimilarFiles(prompt)
+        return embeddingService
+                .getSimilarFiles(prompt)
                 .stream()
                 .map(fileMetadataRepository::findById)
                 .map(this::entityToDto)

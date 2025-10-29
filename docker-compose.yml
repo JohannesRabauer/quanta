@@ -46,8 +46,6 @@ services:
       - QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://db-quanta:15432/quanta
       - QUARKUS_DATASOURCE_USERNAME=quanta
       - QUARKUS_DATASOURCE_PASSWORD=not-secure
-      #- QUARKUS_HTTP_CORS_ORIGINS=http://localhost:3001,http://frontend-quanta:3001
-      - OLLAMA_HOST=http://ollama-quanta:11434
       - QUARKUS_LANGCHAIN4J_OLLAMA_BASE-URL=http://ollama-quanta:11434
       - QUANTA_FILESYSTEM_PATH=/app/resources/demo-files
     ports:
