@@ -7,6 +7,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.util.List;
+import java.util.Objects;
 
 @ApplicationScoped
 public class RetrievalService {
@@ -20,6 +21,7 @@ public class RetrievalService {
                 .getSimilarFiles(prompt)
                 .stream()
                 .map(fileMetadataRepository::findById)
+                .filter(Objects::nonNull)
                 .map(this::entityToDto)
                 .toList();
     }
