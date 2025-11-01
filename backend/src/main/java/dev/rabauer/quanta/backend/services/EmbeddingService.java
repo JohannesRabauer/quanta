@@ -1,5 +1,6 @@
 package dev.rabauer.quanta.backend.services;
 
+import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
@@ -13,6 +14,7 @@ import jakarta.inject.Inject;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import static dev.rabauer.quanta.backend.storage.FileMetadata.toAbsoluteFileString;
 
@@ -25,15 +27,26 @@ public class EmbeddingService {
     @Inject
     PgVectorEmbeddingStore embeddingStore;
 
-    public void embedFileWithContent(String uuid, Path file, String content) {
+    public void embedFileWithContent(String uuid, Path file, String content, String summary) {
         if (content == null || content.isBlank()) {
             return;
         }
-        Embedding embedding = embeddingModel.embed(content).content();
+        String absoluteFilePath = toAbsoluteFileString(file);
+        Embedding embedding = embeddingModel.embed(
+                TextSegment.textSegment(
+                        content,
+                        Metadata.from(
+                                Map.of(
+                                        "Path", absoluteFilePath,
+                                        "Summary", summary
+                                )
+                        )
+                )
+        ).content();
         embeddingStore.addAll(
                 List.of(uuid),
                 List.of(embedding),
-                List.of(TextSegment.textSegment(toAbsoluteFileString(file)))
+                List.of(TextSegment.textSegment(absoluteFilePath))
         );
     }
 
@@ -52,6 +65,7 @@ public class EmbeddingService {
                 .sorted(Comparator.comparingDouble(EmbeddingMatch::score))
                 .map(EmbeddingMatch::embedded)
                 .map(TextSegment::text)
-                .toList().reversed();
+                .toList()
+                .reversed();
     }
 }

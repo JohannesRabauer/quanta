@@ -84,8 +84,8 @@ public class FileWatcherService {
         String fileSummary = null;
         String content = textExtractorService.extractFromFile(filePath);
         if (content != null && !content.isBlank()) {
-            embeddingService.embedFileWithContent(uuid, filePath, content);
             fileSummary = summarizerService.summarize(content);
+            embeddingService.embedFileWithContent(uuid, filePath, content, fileSummary);
         }
         updateMetadata(filePath, lastModified, fileSummary);
     }

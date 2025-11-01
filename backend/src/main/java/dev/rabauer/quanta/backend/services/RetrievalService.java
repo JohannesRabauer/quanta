@@ -7,7 +7,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 
 @ApplicationScoped
 public class RetrievalService {
@@ -17,11 +17,17 @@ public class RetrievalService {
     EmbeddingService embeddingService;
 
     public List<FileMetadataDto> findFiles(String prompt) {
-        return embeddingService
+        List<String> list = embeddingService
                 .getSimilarFiles(prompt)
                 .stream()
-                .map(fileMetadataRepository::findById)
-                .filter(Objects::nonNull)
+                .toList();
+        List<FileMetadata> list1 = list
+                .stream()
+                .map(fileMetadataRepository::findByIdOptional)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+        return list1.stream()
                 .map(this::entityToDto)
                 .toList();
     }

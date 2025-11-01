@@ -22,7 +22,6 @@ public class FileMetadataRepository implements PanacheRepositoryBase<FileMetadat
         if (metadata != null) {
             metadata.setLastModified(lastModified);
             metadata.setSummary(summary);
-            persist(metadata); // Panache persist merges if entity already managed
         }
     }
 }
