@@ -17,7 +17,7 @@ public class FileMetadata extends PanacheEntityBase {
     @Column(name = "path", nullable = false, unique = true, length = 1024)
     private String path;
 
-    @Column(name = "last_modified", nullable = false)
+    @Column(name = "last_modified")
     private Long lastModified;
 
     @Column(name = "vector_uuid")

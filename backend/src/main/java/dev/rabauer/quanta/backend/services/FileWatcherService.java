@@ -54,7 +54,7 @@ public class FileWatcherService {
             long lastModified = Files.getLastModifiedTime(filePath).toMillis();
             FileMetadata existingMetadata = ensureMetadata(lastModified, filePath);
 
-            if (existingMetadata.getLastModified() != lastModified) {
+            if (existingMetadata.getLastModified() == null || existingMetadata.getLastModified() != lastModified) {
                 // file changed
                 onFileChanged(existingMetadata.getVectorUUID(), filePath, lastModified);
             } else {
@@ -70,8 +70,8 @@ public class FileWatcherService {
         FileMetadata existingMetadata = fileMetadataRepository.findById(toAbsoluteFileString(filePath));
 
         if (existingMetadata == null || existingMetadata.getLastModified() == null) {
-            // new file, store timestamp
-            return fileMetadataRepository.saveMetadata(filePath.toString(), lastModified - 1, null);
+            // new file, store timestamp — use absolute path so later lookups/updates match
+            return fileMetadataRepository.saveMetadata(toAbsoluteFileString(filePath), null, null);
         }
         return existingMetadata;
     }
