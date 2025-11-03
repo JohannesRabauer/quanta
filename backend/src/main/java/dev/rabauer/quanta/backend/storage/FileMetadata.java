@@ -23,7 +23,7 @@ public class FileMetadata extends PanacheEntityBase {
     @Column(name = "vector_uuid")
     private String vectorUUID;
 
-    @Column(name = "summary", length = 2000)
+    @Column(name = "summary", columnDefinition = "TEXT")
     private String summary;
 
     public FileMetadata() {
