@@ -26,13 +26,21 @@ public class FileMetadata extends PanacheEntityBase {
     @Column(name = "summary", columnDefinition = "TEXT")
     private String summary;
 
+    @Column(name = "tags", columnDefinition = "TEXT")
+    private String tags;
+
+    @Column(name = "relations", columnDefinition = "TEXT")
+    private String relations;
+
     public FileMetadata() {
     }
 
-    public FileMetadata(String path, Long lastModified, String summary) {
+    public FileMetadata(String path, Long lastModified, String summary, String tags, String relations) {
         this.path = path;
         this.lastModified = lastModified;
         this.summary = summary;
+        this.tags = tags;
+        this.relations = relations;
         this.vectorUUID = UUID.randomUUID().toString();
     }
 
@@ -70,5 +78,21 @@ public class FileMetadata extends PanacheEntityBase {
 
     public void setVectorUUID(String vectorUUID) {
         this.vectorUUID = vectorUUID;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
+    }
+
+    public String getRelations() {
+        return relations;
+    }
+
+    public void setRelations(String relations) {
+        this.relations = relations;
     }
 }

@@ -4,6 +4,8 @@ public record FileMetadataDto(
         String name,
         String path,
         String hash,
-        String summary
+        String summary,
+        String tags,
+        String relations
 ) {
 }

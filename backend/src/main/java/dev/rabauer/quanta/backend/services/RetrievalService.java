@@ -32,12 +32,20 @@ public class RetrievalService {
                 .toList();
     }
 
+    public List<FileMetadataDto> findFilesByTag(String tag) {
+        return fileMetadataRepository.findByTag(tag).stream()
+                .map(this::entityToDto)
+                .toList();
+    }
+
     private FileMetadataDto entityToDto(FileMetadata fileMetadata) {
         return new FileMetadataDto(
                 fileMetadata.getPath(),
                 fileMetadata.getPath(),
                 "",
-                fileMetadata.getSummary()
+                fileMetadata.getSummary(),
+                fileMetadata.getTags(),
+                fileMetadata.getRelations()
         );
     }
 }
