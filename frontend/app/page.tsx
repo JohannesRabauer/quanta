@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 import { useFileSearch } from "@/app/hooks/useFileSearch";
 import SearchBar from "@/app/components/SearchBar";
 import ResultCard from "@/app/components/ResultCard";
@@ -43,119 +44,218 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black text-white flex flex-col">
+    <main className="min-h-screen bg-[#0a0a0f] text-white flex flex-col relative overflow-hidden">
+      {/* Background ambient effects */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[120px]" />
+      </div>
+
       {/* Header */}
-      <header className="flex-shrink-0 border-b border-gray-800/50 bg-gray-900/50 backdrop-blur-sm">
-        <div className="max-w-screen-2xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-3 mb-4">
-            <Image
-              src="/logo.png"
-              alt="AI Owl Logo"
-              width={40}
-              height={40}
-              style={{
-                filter:
-                  "invert(1) hue-rotate(180deg) drop-shadow(0 0 8px #00ffff)",
-              }}
-              className="opacity-90"
-            />
-            <h1 className="text-2xl font-bold text-cyan-400 tracking-wide">
+      <motion.header
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="flex-shrink-0 relative z-10 border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl"
+      >
+        <div className="max-w-screen-2xl mx-auto px-6 py-5">
+          <div className="flex items-center gap-3 mb-5">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              <Image
+                src="/logo.png"
+                alt="Quanta Logo"
+                width={36}
+                height={36}
+                style={{
+                  filter: "invert(1) hue-rotate(180deg) drop-shadow(0 0 10px rgba(6,182,212,0.6))",
+                }}
+                className="opacity-90"
+              />
+            </motion.div>
+            <motion.h1
+              initial={{ x: -10, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-cyan-300 bg-clip-text text-transparent tracking-wide"
+            >
               Quanta
-            </h1>
+            </motion.h1>
           </div>
 
-          <SearchBar
-            query={query}
-            onQueryChange={setQuery}
-            onSearch={handleSearch}
-          />
+          <motion.div
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <SearchBar
+              query={query}
+              onQueryChange={setQuery}
+              onSearch={handleSearch}
+            />
+          </motion.div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative z-10">
         {/* Results List */}
-        <div
-          className={`flex-shrink-0 overflow-y-auto transition-all duration-300 ${
+        <motion.div
+          layout
+          className={`flex-shrink-0 overflow-y-auto transition-all duration-500 ease-in-out ${
             isPanelCollapsed ? "flex-1" : "w-full md:w-2/5 lg:w-1/3"
           }`}
         >
           <div className="p-6 space-y-2">
-            {loading && <LoadingState />}
-
-            {results.length > 0 &&
-              results.map((result) => (
-                <ResultCard
-                  key={result.path}
-                  result={result}
-                  isSelected={selectedPath === result.path}
-                  onSelect={() => handleSelectFile(result.path)}
-                />
-              ))}
-
-            {hasNoResults && <EmptyState />}
-
-            {!loading && results.length === 0 && !query && (
-              <div className="text-center py-20 text-gray-600">
-                <svg
-                  className="w-16 h-16 mx-auto mb-4 text-gray-700"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+            <AnimatePresence mode="wait">
+              {loading && (
+                <motion.div
+                  key="loading"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-                <p className="text-lg">Start searching to find files</p>
-              </div>
-            )}
+                  <LoadingState />
+                </motion.div>
+              )}
+
+              {!loading && results.length > 0 && (
+                <motion.div
+                  key="results"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="space-y-2"
+                >
+                  <p className="text-xs text-gray-500 mb-3 px-1">
+                    {results.length} result{results.length !== 1 ? "s" : ""} found
+                  </p>
+                  {results.map((result, index) => (
+                    <motion.div
+                      key={result.path}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.3,
+                        delay: index * 0.05,
+                        ease: "easeOut",
+                      }}
+                    >
+                      <ResultCard
+                        result={result}
+                        isSelected={selectedPath === result.path}
+                        onSelect={() => handleSelectFile(result.path)}
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+
+              {hasNoResults && (
+                <motion.div
+                  key="empty"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <EmptyState />
+                </motion.div>
+              )}
+
+              {!loading && results.length === 0 && !query && (
+                <motion.div
+                  key="initial"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-24"
+                >
+                  <motion.div
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <svg
+                      className="w-16 h-16 mx-auto mb-5 text-gray-700/60"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                  </motion.div>
+                  <p className="text-gray-500 text-sm">
+                    Start searching to discover files
+                  </p>
+                  <p className="text-gray-600/60 text-xs mt-2">
+                    Search by content, tags, or topics
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-        </div>
+        </motion.div>
 
         {/* Metadata Panel */}
-        {!isPanelCollapsed && (
-          <div className="hidden md:block flex-1 overflow-hidden">
-            <MetadataPanel
-              result={selectedResult}
-              isCollapsed={isPanelCollapsed}
-              onToggleCollapse={handleTogglePanel}
-              isEditing={editingPath === selectedPath}
-              newTags={newTags}
-              onNewTagsChange={setNewTags}
-              onStartEditing={handleStartEditing}
-              onSaveTags={handleUpdateTags}
-              onCancelEditing={handleCancelEditing}
-              onTagClick={handleTagClick}
-            />
-          </div>
-        )}
+        <AnimatePresence mode="wait">
+          {!isPanelCollapsed && (
+            <motion.div
+              key="panel"
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: "auto", opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="hidden md:block flex-1 overflow-hidden"
+            >
+              <MetadataPanel
+                result={selectedResult}
+                isCollapsed={isPanelCollapsed}
+                onToggleCollapse={handleTogglePanel}
+                isEditing={editingPath === selectedPath}
+                newTags={newTags}
+                onNewTagsChange={setNewTags}
+                onStartEditing={handleStartEditing}
+                onSaveTags={handleUpdateTags}
+                onCancelEditing={handleCancelEditing}
+                onTagClick={handleTagClick}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Collapsed Panel Button */}
-        {isPanelCollapsed && (
-          <button
-            onClick={handleTogglePanel}
-            className="hidden md:block flex-shrink-0 w-12 border-l border-gray-800 bg-gray-900/30 hover:bg-gray-800/50 transition-colors group"
-            aria-label="Expand panel"
-          >
-            <svg
-              className="w-6 h-6 mx-auto text-gray-600 group-hover:text-cyan-400 transition-colors"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+        <AnimatePresence>
+          {isPanelCollapsed && (
+            <motion.button
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              onClick={handleTogglePanel}
+              className="hidden md:flex items-center justify-center flex-shrink-0 w-10 border-l border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-colors group"
+              aria-label="Expand panel"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
-              />
-            </svg>
-          </button>
-        )}
+              <svg
+                className="w-4 h-4 text-gray-600 group-hover:text-cyan-400 transition-colors"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                />
+              </svg>
+            </motion.button>
+          )}
+        </AnimatePresence>
       </div>
     </main>
   );
