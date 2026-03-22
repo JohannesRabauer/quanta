@@ -12,24 +12,24 @@ export default function EditTagsForm({
   onCancel,
 }: EditTagsFormProps) {
   return (
-    <div className="mt-2 flex gap-2">
+    <div className="flex gap-2">
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="flex-1 bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-white"
-        placeholder="tag1, tag2..."
+        className="flex-1 bg-gray-900/60 border border-gray-700 rounded-md px-3 py-1.5 text-sm text-white focus:border-cyan-500 focus:outline-none"
+        placeholder="tag1, tag2, tag3..."
         autoFocus
       />
       <button
         onClick={onSave}
-        className="bg-cyan-600 text-xs px-3 py-1 rounded"
+        className="bg-cyan-600 hover:bg-cyan-500 text-white text-xs px-3 py-1.5 rounded-md font-medium transition-colors"
       >
         Save
       </button>
       <button
         onClick={onCancel}
-        className="text-xs px-3 py-1 rounded bg-gray-700"
+        className="text-xs px-3 py-1.5 rounded-md bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors"
       >
         Cancel
       </button>

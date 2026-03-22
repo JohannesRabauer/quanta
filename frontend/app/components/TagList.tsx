@@ -9,14 +9,14 @@ export default function TagList({ tags, onTagClick }: TagListProps) {
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1.5">
       {tags.map((tag) => (
         <span
           key={tag}
           onClick={() => onTagClick(tag)}
-          className="px-2 py-1 text-xs rounded bg-cyan-900/30 text-cyan-300 border border-cyan-800/50 cursor-pointer hover:bg-cyan-500 hover:text-black transition-colors"
+          className="px-2.5 py-1 text-xs rounded-md bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 cursor-pointer hover:bg-cyan-500/20 hover:border-cyan-400 transition-all"
         >
-          {tag}
+          #{tag}
         </span>
       ))}
     </div>

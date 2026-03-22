@@ -5,4 +5,6 @@ export interface FileMetadata {
   summary: string;
   tags?: string;
   relations?: string;
+  size?: number;
+  last_modified?: string;
 }

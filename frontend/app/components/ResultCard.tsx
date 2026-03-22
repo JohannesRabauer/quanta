@@ -1,75 +1,69 @@
 import { FileMetadata } from "@/app/types";
-import { parseList } from "@/app/lib/utils";
-import TagList from "@/app/components/TagList";
-import RelationList from "@/app/components/RelationList";
-import EditTagsForm from "@/app/components/EditTagsForm";
 
 interface ResultCardProps {
   result: FileMetadata;
-  isEditing: boolean;
-  newTags: string;
-  onNewTagsChange: (value: string) => void;
-  onStartEditing: (path: string, currentTags: string) => void;
-  onSaveTags: (path: string) => void;
-  onCancelEditing: () => void;
-  onTagClick: (tag: string) => void;
+  isSelected: boolean;
+  onSelect: () => void;
 }
 
 export default function ResultCard({
   result,
-  isEditing,
-  newTags,
-  onNewTagsChange,
-  onStartEditing,
-  onSaveTags,
-  onCancelEditing,
-  onTagClick,
+  isSelected,
+  onSelect,
 }: ResultCardProps) {
   const fileName = result.name.split(/[/\\]/).pop();
-  const tags = parseList(result.tags);
-  const relations = parseList(result.relations);
+  
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return "N/A";
+    const kb = bytes / 1024;
+    if (kb < 1024) return `${kb.toFixed(1)} KB`;
+    const mb = kb / 1024;
+    return `${mb.toFixed(1)} MB`;
+  };
 
   return (
-    <div className="result-card p-6 rounded-xl bg-gray-800/50 border border-gray-700 hover:border-cyan-500/50 transition-all">
-      <div className="flex justify-between items-start mb-3">
-        <h3 className="text-xl font-semibold text-cyan-400 break-all">
-          {fileName}
-        </h3>
-        <button
-          onClick={() => onStartEditing(result.path, result.tags ?? "")}
-          className="text-xs text-gray-400 hover:text-cyan-300"
-        >
-          Edit Tags
-        </button>
-      </div>
-
-      <p className="text-sm text-gray-500 mb-4 font-mono truncate">
-        {result.path}
-      </p>
-
-      <p className="text-gray-300 mb-6 leading-relaxed">{result.summary}</p>
-
-      <div className="space-y-4">
-        <div>
-          <h4 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">
-            Tags
-          </h4>
-          <TagList tags={tags} onTagClick={onTagClick} />
-          {isEditing && (
-            <EditTagsForm
-              value={newTags}
-              onChange={onNewTagsChange}
-              onSave={() => onSaveTags(result.path)}
-              onCancel={onCancelEditing}
-            />
-          )}
+    <div
+      onClick={onSelect}
+      className={`group cursor-pointer p-4 rounded-lg border transition-all duration-200 ${
+        isSelected
+          ? "bg-cyan-500/10 border-cyan-500/50 shadow-lg shadow-cyan-500/20"
+          : "bg-gray-800/30 border-gray-700/50 hover:bg-gray-800/50 hover:border-cyan-500/30"
+      }`}
+    >
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className="flex-shrink-0">
+            <svg
+              className={`w-5 h-5 transition-colors ${
+                isSelected ? "text-cyan-400" : "text-gray-500 group-hover:text-cyan-400"
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+          </div>
+          
+          <div className="min-w-0 flex-1">
+            <h3 className={`text-sm font-medium truncate transition-colors ${
+              isSelected ? "text-cyan-300" : "text-gray-200 group-hover:text-cyan-300"
+            }`}>
+              {fileName}
+            </h3>
+            <p className="text-xs text-gray-500 font-mono truncate mt-0.5">
+              {result.path}
+            </p>
+          </div>
         </div>
 
-        <div>
-          <h4 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">
-            Related Topics
-          </h4>
-          <RelationList relations={relations} />
+        <div className="flex-shrink-0 text-xs text-gray-500 font-medium">
+          {formatFileSize(result.size)}
         </div>
       </div>
     </div>

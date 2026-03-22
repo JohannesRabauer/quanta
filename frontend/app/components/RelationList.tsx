@@ -10,11 +10,11 @@ export default function RelationList({ relations }: RelationListProps) {
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1.5">
       {relations.map((rel) => (
         <span
           key={rel}
-          className="px-2 py-1 text-xs rounded bg-purple-900/30 text-purple-300 border border-purple-800/50"
+          className="px-2.5 py-1 text-xs rounded-md bg-purple-500/10 text-purple-400 border border-purple-500/30"
         >
           {rel}
         </span>
