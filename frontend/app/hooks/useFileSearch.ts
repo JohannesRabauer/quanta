@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FileMetadata } from "@/app/types";
 import { searchFiles, searchByTag, updateFileTags } from "@/app/lib/api";
 
@@ -20,18 +21,36 @@ interface UseFileSearchReturn {
 }
 
 export function useFileSearch(): UseFileSearchReturn {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<FileMetadata[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingPath, setEditingPath] = useState<string | null>(null);
   const [newTags, setNewTags] = useState("");
 
-  const handleSearch = async () => {
-    if (!query.trim()) return;
+  // Load query from URL on mount
+  useEffect(() => {
+    const urlQuery = searchParams.get("q");
+    const urlTag = searchParams.get("tag");
+    
+    if (urlQuery) {
+      setQuery(urlQuery);
+      performSearch(urlQuery, false);
+    } else if (urlTag) {
+      setQuery(urlTag);
+      performTagSearch(urlTag);
+    }
+  }, [searchParams]);
+
+  const performSearch = async (searchQuery: string, isTag: boolean = false) => {
+    if (!searchQuery.trim()) return;
 
     setLoading(true);
     try {
-      const data = await searchFiles(query);
+      const data = isTag 
+        ? await searchByTag(searchQuery)
+        : await searchFiles(searchQuery);
       setResults(data);
     } catch (error) {
       console.error("Error fetching search results:", error);
@@ -40,8 +59,9 @@ export function useFileSearch(): UseFileSearchReturn {
     }
   };
 
-  const handleTagClick = async (tag: string) => {
-    setQuery(tag);
+  const performTagSearch = async (tag: string) => {
+    if (!tag.trim()) return;
+
     setLoading(true);
     try {
       const data = await searchByTag(tag);
@@ -51,6 +71,24 @@ export function useFileSearch(): UseFileSearchReturn {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = async () => {
+    if (!query.trim()) return;
+
+    // Update URL
+    router.push(`/?q=${encodeURIComponent(query)}`);
+    
+    await performSearch(query, false);
+  };
+
+  const handleTagClick = async (tag: string) => {
+    setQuery(tag);
+    
+    // Update URL
+    router.push(`/?tag=${encodeURIComponent(tag)}`);
+    
+    await performTagSearch(tag);
   };
 
   const handleUpdateTags = async (path: string) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useFileSearch } from "@/app/hooks/useFileSearch";
@@ -10,7 +10,7 @@ import MetadataPanel from "@/app/components/MetadataPanel";
 import LoadingState from "@/app/components/LoadingState";
 import EmptyState from "@/app/components/EmptyState";
 
-export default function Home() {
+function SearchContent() {
   const {
     query,
     setQuery,
@@ -258,5 +258,17 @@ export default function Home() {
         </AnimatePresence>
       </div>
     </main>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#0a0a0f] text-white flex items-center justify-center">
+        <LoadingState />
+      </div>
+    }>
+      <SearchContent />
+    </Suspense>
   );
 }

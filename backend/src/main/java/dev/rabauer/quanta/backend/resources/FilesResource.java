@@ -18,10 +18,10 @@ public class FilesResource {
     @Inject
     FileMetadataRepository fileMetadataRepository;
 
-    @POST
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/searchFiles")
-    public List<FileMetadataDto> searchFiles(String prompt) {
+    public List<FileMetadataDto> searchFiles(@QueryParam("prompt") String prompt) {
         return retrievalService.findFiles(prompt);
     }
 
@@ -37,13 +37,5 @@ public class FilesResource {
     @Transactional
     public void updateTags(@QueryParam("path") String path, String tags) {
         fileMetadataRepository.updateTags(path, tags);
-    }
-
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/fileSummary")
-    public FileMetadataDto getFileSummary(String fileHash) {
-        // TODO
-        return new FileMetadataDto("", "", "", "", "", "");
     }
 }
