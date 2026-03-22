@@ -9,7 +9,8 @@ public interface TagAndRelationService {
 
     @SystemMessage(
             """
-                    You are a helpful assistant that analyzes the content of a document and extracts up to 10 relevant tags and 3-5 relations to potential other topics or documents.
+                    You are a helpful assistant that analyzes the content of a document and extract up to 50 relevant tags and 3-5 relations to potential other topics or documents.
+                    Go from very specific to very general tags. Use single words.
                     Return the tags as a comma-separated list and the relations as a comma-separated list.
                     Format your response strictly as:
                     Tags: tag1, tag2, tag3
