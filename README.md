@@ -189,6 +189,53 @@ Check `backend/src/main/resources/application.properties` for backend-specific c
 
 If you hit an issue not covered here, open an issue with the failure logs and steps to reproduce.
 
+## 🕸️ Planned Neo4j GraphRAG Design (Not Yet Implemented)
+
+### 1. GraphRAG data model
+
+```mermaid
+graph LR
+    F[File]
+    C[Chunk]
+    V[Vector]
+    T[Tag]
+
+    F -->|HAS_CHUNK| C
+    C -->|HAS_VECTOR| V
+    F -->|HAS_TAG| T
+```
+
+Basic relationships:
+- **File**: document with path and metadata.
+- **Chunk**: text segment of a file.
+- **Vector**: embedding of a chunk for semantic search.
+- **Tag**: metadata label attached to files.
+
+### 2. Indexing and retrieval workflow
+
+```mermaid
+flowchart TD
+    A[File Watcher detects file]
+    B[Parser chunks the file]
+    C[Embedding Model vectorizes chunks]
+    D[Store in Neo4j: File, Chunks, Vectors, Tags]
+    E[User enters search query]
+    F[Embed query, vector search on chunks]
+    G[Graph lookup: connected tags & related files]
+    H[Return results]
+
+    A --> B
+    B --> C
+    C --> D
+    E --> F
+    F --> G
+    G --> H
+```
+
+Workflow:
+1. **Index**: watch → chunk → embed → store in Neo4j.
+2. **Retrieve**: embed query → vector search → graph expansion → return results with related metadata.
+
 ## Contributing
 
 Contributions are welcome. If you plan to add features or fix bugs:
