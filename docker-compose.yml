@@ -19,25 +19,20 @@ services:
     entrypoint: [ "/bin/sh", "/init/run_ollama.sh" ]
 
   db:
-    build:
-      context: ./db
+    image: neo4j:2026.02.3
     container_name: db-quanta
     ports:
-      - 15432:5432
+      - 7474:7474
+      - 7687:7687
     environment:
-      - POSTGRES_USER=quanta
-      - POSTGRES_PASSWORD=not-secure
-      - POSTGRES_DB=quanta
-      - POSTGRES_HOST_AUTH_METHOD=trust
-      - PGDATA=/var/lib/postgresql/data/pgdata
+      - NEO4J_AUTH=neo4j/not-secure
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U quanta -d quanta"]
+      test: [ "CMD", "/var/lib/neo4j/bin/cypher-shell", "-u", "neo4j", "-p", "not-secure", "MATCH () RETURN count(*) as count" ]
       interval: 5s
       timeout: 3s
       retries: 5
     volumes:
-      - ./db/data/:/var/lib/postgresql/data/
-      - ./db/init:/docker-entrypoint-initdb.d
+      - ./db/data/:/data/
 
   backend:
     build:
