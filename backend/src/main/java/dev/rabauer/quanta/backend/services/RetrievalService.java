@@ -2,17 +2,13 @@ package dev.rabauer.quanta.backend.services;
 
 import dev.rabauer.quanta.backend.resources.FileMetadataDto;
 import dev.rabauer.quanta.backend.storage.FileMetadata;
-import dev.rabauer.quanta.backend.storage.FileMetadataRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.util.List;
-import java.util.Optional;
 
 @ApplicationScoped
 public class RetrievalService {
-    @Inject
-    FileMetadataRepository fileMetadataRepository;
     @Inject
     EmbeddingService embeddingService;
 
@@ -21,21 +17,22 @@ public class RetrievalService {
                 .getSimilarFiles(prompt)
                 .stream()
                 .toList();
-        List<FileMetadata> list1 = list
-                .stream()
-                .map(fileMetadataRepository::findByIdOptional)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
-        return list1.stream()
-                .map(this::entityToDto)
+//        List<FileMetadata> list1 = list
+//                .stream()
+//                .map(fileContent -> Optional.of(fileContent))
+//                .filter(Optional::isPresent)
+//                .map(Optional::get)
+//                .toList();
+        return list.stream()
+                .map(fileContent -> new FileMetadataDto("1", "1", "1", fileContent, "1", "1"))
                 .toList();
     }
 
     public List<FileMetadataDto> findFilesByTag(String tag) {
-        return fileMetadataRepository.findByTag(tag).stream()
-                .map(this::entityToDto)
-                .toList();
+        return List.of();
+//        return fileMetadataRepository.findByTag(tag).stream()
+//                .map(this::entityToDto)
+//                .toList();
     }
 
     private FileMetadataDto entityToDto(FileMetadata fileMetadata) {
@@ -44,7 +41,7 @@ public class RetrievalService {
                 fileMetadata.getPath(),
                 "",
                 fileMetadata.getSummary(),
-                fileMetadata.getTags(),
+                "",
                 fileMetadata.getRelations()
         );
     }

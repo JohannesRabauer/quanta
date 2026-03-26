@@ -1,13 +1,13 @@
 package dev.rabauer.quanta.backend.services;
 
 import dev.rabauer.quanta.backend.storage.FileMetadata;
-import dev.rabauer.quanta.backend.storage.FileMetadataRepository;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
+import org.neo4j.ogm.session.Session;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,11 +21,12 @@ import static dev.rabauer.quanta.backend.storage.FileMetadata.toAbsoluteFileStri
 public class FileWatcherService {
 
     private static final Logger LOG = Logger.getLogger(FileWatcherService.class);
-    @Inject
-    FileMetadataRepository fileMetadataRepository;
 
     @Inject
     EmbeddingService embeddingService;
+
+    @Inject
+    Session session;
 
     @Inject
     TextExtractorService textExtractorService;
@@ -59,7 +60,7 @@ public class FileWatcherService {
 
             if (existingMetadata.getLastModified() == null || existingMetadata.getLastModified() != lastModified) {
                 // file changed
-                onFileChanged(existingMetadata.getVectorUUID(), filePath, lastModified);
+                onFileChanged(existingMetadata, filePath, lastModified);
             } else {
                 LOG.debugf("File unchanged: %s (lastModified=%d)", filePath, lastModified);
             }
@@ -70,11 +71,13 @@ public class FileWatcherService {
 
     @Transactional
     public FileMetadata ensureMetadata(long lastModified, Path filePath) {
-        FileMetadata existingMetadata = fileMetadataRepository.findById(toAbsoluteFileString(filePath));
+        FileMetadata existingMetadata = session.load(FileMetadata.class, toAbsoluteFileString(filePath));
 
         if (existingMetadata == null || existingMetadata.getLastModified() == null) {
             // new file, store timestamp — use absolute path so later lookups/updates match
-            return fileMetadataRepository.saveMetadata(toAbsoluteFileString(filePath), null, null, null, null);
+            FileMetadata fileMetadata = new FileMetadata(toAbsoluteFileString(filePath), lastModified, null, null);
+            session.save(fileMetadata);
+            return fileMetadata;
         }
         return existingMetadata;
     }
@@ -82,7 +85,7 @@ public class FileWatcherService {
     /**
      * Called whenever a file has changed or is new.
      */
-    private void onFileChanged(String uuid, Path filePath, long lastModified) {
+    private void onFileChanged(FileMetadata fileMetadata, Path filePath, long lastModified) {
         LOG.infof("File changed: %s (lastModified=%d)", filePath, lastModified);
         String fileSummary = null;
         String tags = null;
@@ -95,7 +98,7 @@ public class FileWatcherService {
                 tags = extractFromAnalysis(analysis, "Tags:");
                 relations = extractFromAnalysis(analysis, "Relations:");
             }
-            embeddingService.embedFileWithContent(uuid, filePath, content, fileSummary);
+            embeddingService.embedFileWithContent(fileMetadata, filePath, content, fileSummary);
         }
         updateMetadata(filePath, lastModified, fileSummary, tags, relations);
     }
@@ -111,6 +114,6 @@ public class FileWatcherService {
 
     @Transactional
     public void updateMetadata(Path filePath, long lastModified, String fileSummary, String tags, String relations) {
-        fileMetadataRepository.updateMetadata(toAbsoluteFileString(filePath), lastModified, fileSummary, tags, relations);
+//        fileMetadataRepository.updateMetadata(toAbsoluteFileString(filePath), lastModified, fileSummary, tags, relations);
     }
 }

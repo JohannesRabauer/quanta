@@ -1,47 +1,35 @@
 package dev.rabauer.quanta.backend.storage;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import org.neo4j.ogm.annotation.Id;
+import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Relationship;
 
 import java.nio.file.Path;
-import java.util.UUID;
+import java.util.List;
 
-@Entity
-@Table(name = "file_metadata")
-public class FileMetadata extends PanacheEntityBase {
+@NodeEntity
+public class FileMetadata implements java.io.Serializable {
 
     @Id
-    @Column(name = "path", nullable = false, unique = true, length = 1024)
     private String path;
 
-    @Column(name = "last_modified")
     private Long lastModified;
 
-    @Column(name = "vector_uuid")
-    private String vectorUUID;
-
-    @Column(name = "summary", columnDefinition = "TEXT")
     private String summary;
 
-    @Column(name = "tags", columnDefinition = "TEXT")
-    private String tags;
+    @Relationship(type = "HAS_TAG", direction = Relationship.Direction.OUTGOING)
+    private List<Tag> tags;
 
-    @Column(name = "relations", columnDefinition = "TEXT")
     private String relations;
 
     public FileMetadata() {
     }
 
-    public FileMetadata(String path, Long lastModified, String summary, String tags, String relations) {
+    public FileMetadata(String path, Long lastModified, String summary, String relations) {
         this.path = path;
         this.lastModified = lastModified;
         this.summary = summary;
-        this.tags = tags;
         this.relations = relations;
-        this.vectorUUID = UUID.randomUUID().toString();
     }
 
     public static String toAbsoluteFileString(Path filePath) {
@@ -70,22 +58,6 @@ public class FileMetadata extends PanacheEntityBase {
 
     public void setSummary(String summary) {
         this.summary = summary;
-    }
-
-    public String getVectorUUID() {
-        return vectorUUID;
-    }
-
-    public void setVectorUUID(String vectorUUID) {
-        this.vectorUUID = vectorUUID;
-    }
-
-    public String getTags() {
-        return tags;
-    }
-
-    public void setTags(String tags) {
-        this.tags = tags;
     }
 
     public String getRelations() {

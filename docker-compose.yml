@@ -26,11 +26,11 @@ services:
       - 7687:7687
     environment:
       - NEO4J_AUTH=neo4j/not-secure
-    healthcheck:
-      test: [ "CMD", "/var/lib/neo4j/bin/cypher-shell", "-u", "neo4j", "-p", "not-secure", "MATCH () RETURN count(*) as count" ]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+    # healthcheck:
+    #   test: [ "CMD", "/var/lib/neo4j/bin/cypher-shell", "-u", "neo4j", "-p", "not-secure", "MATCH () RETURN count(*) as count" ]
+    #   interval: 5s
+    #   timeout: 3s
+    #   retries: 5
     volumes:
       - ./db/data/:/data/
 
@@ -41,7 +41,7 @@ services:
     container_name: backend-quanta
     depends_on:
       db:
-        condition: service_healthy
+        condition: service_started
       ollama:
         condition: service_started
     environment:
