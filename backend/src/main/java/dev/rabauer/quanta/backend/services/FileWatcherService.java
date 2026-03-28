@@ -26,7 +26,7 @@ public class FileWatcherService {
     EmbeddingService embeddingService;
 
     @Inject
-    Session session;
+    org.neo4j.ogm.session.SessionFactory sessionFactory;
 
     @Inject
     TextExtractorService textExtractorService;
@@ -71,6 +71,7 @@ public class FileWatcherService {
 
     @Transactional
     public FileMetadata ensureMetadata(long lastModified, Path filePath) {
+        Session session = sessionFactory.openSession();
         FileMetadata existingMetadata = session.load(FileMetadata.class, toAbsoluteFileString(filePath));
 
         if (existingMetadata == null || existingMetadata.getLastModified() == null) {
@@ -114,6 +115,13 @@ public class FileWatcherService {
 
     @Transactional
     public void updateMetadata(Path filePath, long lastModified, String fileSummary, String tags, String relations) {
-//        fileMetadataRepository.updateMetadata(toAbsoluteFileString(filePath), lastModified, fileSummary, tags, relations);
+        Session session = sessionFactory.openSession();
+        FileMetadata existingMetadata = session.load(FileMetadata.class, toAbsoluteFileString(filePath));
+        if (existingMetadata != null) {
+            existingMetadata.setLastModified(lastModified);
+            existingMetadata.setSummary(fileSummary);
+            existingMetadata.setRelations(relations);
+            session.save(existingMetadata);
+        }
     }
 }

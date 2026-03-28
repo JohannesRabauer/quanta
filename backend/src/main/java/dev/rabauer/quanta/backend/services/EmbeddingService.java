@@ -28,12 +28,13 @@ public class EmbeddingService {
     EmbeddingModel embeddingModel;
 
     @Inject
-    Session session;
+    org.neo4j.ogm.session.SessionFactory sessionFactory;
 
     @Inject
     Neo4jEmbeddingStore embeddingStore;
 
     public void embedFileWithContent(FileMetadata fileMetadata, Path file, String content, String summary) {
+        Session session = sessionFactory.openSession();
 
         if (content == null || content.isBlank()) {
             return;
