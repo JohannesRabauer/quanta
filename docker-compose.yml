@@ -1,4 +1,23 @@
 services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-quanta
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./ollama/data:/root/.ollama
+      - ./ollama/init:/init
+    environment:
+      - OLLAMA_KEEP_ALIVE=-1
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+    entrypoint: [ "/bin/sh", "/init/run_ollama.sh" ]
+
   db:
     build:
       context: ./db
@@ -28,21 +47,18 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      ollama:
+        condition: service_started
     environment:
       - QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://db-quanta:5432/quanta
       - QUARKUS_DATASOURCE_USERNAME=quanta
       - QUARKUS_DATASOURCE_PASSWORD=not-secure
-      - QUARKUS_LANGCHAIN4J_OLLAMA_BASE-URL=http://host.docker.internal:12434
-      - QUARKUS_LANGCHAIN4J_OLLAMA_EMBEDDING-MODEL_MODEL-NAME=qwen3-embedding:0.6B-F16
-      - QUARKUS_LANGCHAIN4J_OLLAMA_CHAT-MODEL_MODEL-NAME=llama3.2:1B-Q8_0
+      - QUARKUS_LANGCHAIN4J_OLLAMA_BASE-URL=http://ollama-quanta:11434
       - QUARKUS_LANGCHAIN4J_LOG-REQUESTS=false
       - QUARKUS_LANGCHAIN4J_LOG-RESPONSES=false
       - QUANTA_FILESYSTEM_PATH=/app/resources/demo-files
     ports:
       - "8080:8080"
-    models:
-      - llm
-      - embedding-model
     volumes:
       - ./resources/demo-files:/app/resources/demo-files
 
@@ -55,11 +71,3 @@ services:
       - backend
     ports:
       - "3001:3000"
-
-models:
-  llm:
-    model: ai/llama3.2:1B-Q8_0
-  embedding-model:
-    model: ai/qwen3-embedding:0.6B-F16
-    runtime_flags:
-      - "--embeddings"
