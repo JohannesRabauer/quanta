@@ -1,10 +1,10 @@
 package dev.rabauer.quanta.backend.resources;
 
 import dev.rabauer.quanta.backend.services.RetrievalService;
+import dev.rabauer.quanta.backend.storage.FileMetadataRepository;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
 import java.util.List;
@@ -15,18 +15,27 @@ public class FilesResource {
     @Inject
     RetrievalService retrievalService;
 
-    @POST
+    @Inject
+    FileMetadataRepository fileMetadataRepository;
+
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/searchFiles")
-    public List<FileMetadataDto> searchFiles(String prompt) {
+    public List<FileMetadataDto> searchFiles(@QueryParam("prompt") String prompt) {
         return retrievalService.findFiles(prompt);
     }
 
-    @POST
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/fileSummary")
-    public FileMetadataDto getFileSummary(String fileHash) {
-        // TODO
-        return new FileMetadataDto("", "", "", "");
+    @Path("/searchByTag")
+    public List<FileMetadataDto> searchByTag(@QueryParam("tag") String tag) {
+        return retrievalService.findFilesByTag(tag);
+    }
+
+    @POST
+    @Path("/updateTags")
+    @Transactional
+    public void updateTags(@QueryParam("path") String path, String tags) {
+        fileMetadataRepository.updateTags(path, tags);
     }
 }

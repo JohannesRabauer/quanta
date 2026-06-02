@@ -33,6 +33,9 @@ public class FileWatcherService {
     @Inject
     SummarizerService summarizerService;
 
+    @Inject
+    TagAndRelationService tagAndRelationService;
+
     @ConfigProperty(name = "quanta.filesystem.path")
     private String filesystemPathToWatch;
 
@@ -71,7 +74,7 @@ public class FileWatcherService {
 
         if (existingMetadata == null || existingMetadata.getLastModified() == null) {
             // new file, store timestamp — use absolute path so later lookups/updates match
-            return fileMetadataRepository.saveMetadata(toAbsoluteFileString(filePath), null, null);
+            return fileMetadataRepository.saveMetadata(toAbsoluteFileString(filePath), null, null, null, null);
         }
         return existingMetadata;
     }
@@ -82,16 +85,32 @@ public class FileWatcherService {
     private void onFileChanged(String uuid, Path filePath, long lastModified) {
         LOG.infof("File changed: %s (lastModified=%d)", filePath, lastModified);
         String fileSummary = null;
+        String tags = null;
+        String relations = null;
         String content = textExtractorService.extractFromFile(filePath);
         if (content != null && !content.isBlank()) {
             fileSummary = summarizerService.summarize(content);
+            String analysis = tagAndRelationService.analyze(content);
+            if (analysis != null) {
+                tags = extractFromAnalysis(analysis, "Tags:");
+                relations = extractFromAnalysis(analysis, "Relations:");
+            }
             embeddingService.embedFileWithContent(uuid, filePath, content, fileSummary);
         }
-        updateMetadata(filePath, lastModified, fileSummary);
+        updateMetadata(filePath, lastModified, fileSummary, tags, relations);
+    }
+
+    private String extractFromAnalysis(String analysis, String prefix) {
+        for (String line : analysis.split("\n")) {
+            if (line.startsWith(prefix)) {
+                return line.substring(prefix.length()).trim();
+            }
+        }
+        return null;
     }
 
     @Transactional
-    public void updateMetadata(Path filePath, long lastModified, String fileSummary) {
-        fileMetadataRepository.updateMetadata(toAbsoluteFileString(filePath), lastModified, fileSummary);
+    public void updateMetadata(Path filePath, long lastModified, String fileSummary, String tags, String relations) {
+        fileMetadataRepository.updateMetadata(toAbsoluteFileString(filePath), lastModified, fileSummary, tags, relations);
     }
 }
