@@ -1,5 +1,6 @@
 package dev.rabauer.quanta.backend.services;
 
+import dev.langchain4j.community.rag.content.retriever.neo4j.KnowledgeGraphWriter;
 import dev.langchain4j.community.store.embedding.neo4j.Neo4jEmbeddingStore;
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.document.DocumentSplitter;
@@ -57,13 +58,17 @@ public class EmbeddingService {
                         }
                 ).toList();
 
-//        KnowledgeGraphWriter writer = KnowledgeGraphWriter.builder()
-//                .graph(neo4jGraph)
-//                .label("Entity")
-//                .relType("MENTIONS")
-//                .idProperty("id")
-//                .textProperty("text")
-//                .build();
+        LLMGraphTransformer transformer = LLMGraphTransformer.builder()
+                .chatModel(model)
+                .build();
+
+        KnowledgeGraphWriter writer = KnowledgeGraphWriter.builder()
+                .graph(neo4jGraph)
+                .label("Entity")
+                .relType("MENTIONS")
+                .idProperty("id")
+                .textProperty("text")
+                .build();
 //
 //        List<GraphDocument> graphDocuments = GraphDocument.from(
 //                chunks.stream().map(chunk -> GraphNode.from(chunk.getId().toString())).collect(Collectors.toSet()),
