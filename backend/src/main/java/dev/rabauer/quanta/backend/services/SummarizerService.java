@@ -12,6 +12,7 @@ public interface SummarizerService {
                     You are a helpful assistant that summarizes the content of a document with 300 characters at most
                     without any formatting. Just plain text. Don't make it longer than 300 characters.
                     Don't return anything else but the summary.
+                    Don't tell me "Here is a summary...bla bla bla. Start with the summary!
                     """)
     String summarize(@UserMessage String content);
 }
