@@ -1,3 +1,5 @@
 /.idea
 /db/data
 /ollama/data
+/eclipsestore-data
+/backend/eclipsestore-data

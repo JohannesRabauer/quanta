@@ -5,7 +5,6 @@ import dev.rabauer.quanta.backend.storage.FileMetadataRepository;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
@@ -68,7 +67,6 @@ public class FileWatcherService {
         }
     }
 
-    @Transactional
     public FileMetadata ensureMetadata(long lastModified, Path filePath) {
         FileMetadata existingMetadata = fileMetadataRepository.findById(toAbsoluteFileString(filePath));
 
@@ -109,7 +107,6 @@ public class FileWatcherService {
         return null;
     }
 
-    @Transactional
     public void updateMetadata(Path filePath, long lastModified, String fileSummary, String tags, String relations) {
         fileMetadataRepository.updateMetadata(toAbsoluteFileString(filePath), lastModified, fileSummary, tags, relations);
     }

@@ -3,7 +3,6 @@ package dev.rabauer.quanta.backend;
 import dev.rabauer.quanta.backend.services.EmbeddingService;
 import dev.rabauer.quanta.backend.storage.FileMetadata;
 import dev.rabauer.quanta.backend.storage.FileMetadataRepository;
-import io.quarkus.narayana.jta.QuarkusTransaction;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -29,15 +28,13 @@ class FilesResourceIT {
 
     @BeforeEach
     void setUp() {
-        QuarkusTransaction.requiringNew().run(() -> fileMetadataRepository.deleteAll());
+        fileMetadataRepository.deleteAll();
     }
 
     private void persist(FileMetadata... entities) {
-        QuarkusTransaction.requiringNew().run(() -> {
-            for (FileMetadata e : entities) {
-                fileMetadataRepository.persist(e);
-            }
-        });
+        for (FileMetadata e : entities) {
+            fileMetadataRepository.persist(e);
+        }
     }
 
     @Test
@@ -129,10 +126,8 @@ class FilesResourceIT {
                 .then()
                 .statusCode(204);
 
-        QuarkusTransaction.requiringNew().run(() -> {
-            FileMetadata updated = fileMetadataRepository.findById("/docs/report.pdf");
-            assert updated != null;
-            assert updated.getTags().equals("finance,updated");
-        });
+        FileMetadata updated = fileMetadataRepository.findById("/docs/report.pdf");
+        assert updated != null;
+        assert updated.getTags().equals("finance,updated");
     }
 }

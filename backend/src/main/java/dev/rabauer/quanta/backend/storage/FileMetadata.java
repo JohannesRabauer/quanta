@@ -1,35 +1,15 @@
 package dev.rabauer.quanta.backend.storage;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
 import java.nio.file.Path;
 import java.util.UUID;
 
-@Entity
-@Table(name = "file_metadata")
-public class FileMetadata extends PanacheEntityBase {
+public class FileMetadata {
 
-    @Id
-    @Column(name = "path", nullable = false, unique = true, length = 1024)
     private String path;
-
-    @Column(name = "last_modified")
     private Long lastModified;
-
-    @Column(name = "vector_uuid")
     private String vectorUUID;
-
-    @Column(name = "summary", columnDefinition = "TEXT")
     private String summary;
-
-    @Column(name = "tags", columnDefinition = "TEXT")
     private String tags;
-
-    @Column(name = "relations", columnDefinition = "TEXT")
     private String relations;
 
     public FileMetadata() {
