@@ -7,7 +7,7 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingSearchResult;
-import io.quarkiverse.langchain4j.pgvector.PgVectorEmbeddingStore;
+import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -22,8 +22,7 @@ public class EmbeddingService {
     @Inject
     EmbeddingModel embeddingModel;
 
-    @Inject
-    PgVectorEmbeddingStore embeddingStore;
+    InMemoryEmbeddingStore<TextSegment> embeddingStore = new InMemoryEmbeddingStore<>();
 
     public void embedFileWithContent(String uuid, Path file, String content, String summary) {
         if (content == null || content.isBlank()) {

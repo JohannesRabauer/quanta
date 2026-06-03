@@ -7,7 +7,7 @@ import dev.langchain4j.model.output.Response;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingSearchResult;
-import io.quarkiverse.langchain4j.pgvector.PgVectorEmbeddingStore;
+import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,13 +20,13 @@ import static org.mockito.Mockito.*;
 class EmbeddingServiceTest {
 
     private EmbeddingModel embeddingModel;
-    private PgVectorEmbeddingStore embeddingStore;
+    private InMemoryEmbeddingStore<TextSegment> embeddingStore;
     private EmbeddingService embeddingService;
 
     @BeforeEach
     void setUp() throws Exception {
         embeddingModel = mock(EmbeddingModel.class);
-        embeddingStore = mock(PgVectorEmbeddingStore.class);
+        embeddingStore = mock(InMemoryEmbeddingStore.class);
 
         embeddingService = new EmbeddingService();
         setField(embeddingService, "embeddingModel", embeddingModel);

@@ -3,7 +3,6 @@ package dev.rabauer.quanta.backend.resources;
 import dev.rabauer.quanta.backend.services.RetrievalService;
 import dev.rabauer.quanta.backend.storage.FileMetadataRepository;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
@@ -34,7 +33,6 @@ public class FilesResource {
 
     @POST
     @Path("/updateTags")
-    @Transactional
     public void updateTags(@QueryParam("path") String path, String tags) {
         fileMetadataRepository.updateTags(path, tags);
     }
