@@ -12,9 +12,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static dev.rabauer.quanta.backend.storage.FileMetadata.toAbsoluteFileString;
 
@@ -59,13 +57,14 @@ public class EmbeddingService {
                         .maxResults(10)
                         .build()
         );
-        return result
+        SequencedSet<String> seen = new LinkedHashSet<>();
+        result
                 .matches()
                 .stream()
-                .sorted(Comparator.comparingDouble(EmbeddingMatch::score))
+                .sorted(Comparator.comparingDouble(value -> ((EmbeddingMatch<TextSegment>) value).score()).reversed())
                 .map(EmbeddingMatch::embedded)
                 .map(TextSegment::text)
-                .toList()
-                .reversed();
+                .forEach(seen::add);
+        return new ArrayList<>(seen);
     }
 }
