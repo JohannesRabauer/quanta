@@ -2,31 +2,27 @@ package dev.rabauer.quanta.backend.storage;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.eclipse.store.storage.embedded.types.EmbeddedStorageManager;
+import org.eclipse.store.gigamap.types.GigaMap;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @ApplicationScoped
 public class FileMetadataRepository {
 
     @Inject
-    EmbeddedStorageManager storage;
-
-    @Inject
     StorageRoot root;
 
-    private Map<String, FileMetadata> store() {
-        return root.getFileMetadataByPath();
+    private GigaMap<FileMetadata> map() {
+        return root.getFileMetadata();
     }
 
     public FileMetadata findById(String path) {
-        return store().get(path);
+        return map().query(StorageRoot.FILE_PATH_INDEX.is(path)).toList().stream().findFirst().orElse(null);
     }
 
     public Optional<FileMetadata> findByIdOptional(String path) {
-        return Optional.ofNullable(store().get(path));
+        return Optional.ofNullable(findById(path));
     }
 
     public Long findLastModifiedByPath(String path) {
@@ -35,44 +31,69 @@ public class FileMetadataRepository {
     }
 
     public FileMetadata saveMetadata(String path, Long lastModified, String summary, String tags, String relations) {
-        FileMetadata newFileMetadata = new FileMetadata(path, lastModified, summary, tags, relations);
-        store().put(path, newFileMetadata);
-        storage.store(store());
-        return newFileMetadata;
+        FileMetadata existing = findById(path);
+        if (existing != null) {
+            map().update(existing, m -> {
+                m.setLastModified(lastModified);
+                m.setSummary(summary);
+                m.setTags(tags);
+                m.setRelations(relations);
+            });
+            map().store();
+            return findById(path);
+        }
+        FileMetadata newEntry = new FileMetadata(path, lastModified, summary, tags, relations);
+        map().add(newEntry);
+        map().store();
+        return newEntry;
     }
 
     public void updateMetadata(String path, Long lastModified, String summary, String tags, String relations) {
         FileMetadata metadata = findById(path);
         if (metadata != null) {
-            metadata.setLastModified(lastModified);
-            metadata.setSummary(summary);
-            metadata.setTags(tags);
-            metadata.setRelations(relations);
-            storage.store(metadata);
+            map().update(metadata, m -> {
+                m.setLastModified(lastModified);
+                m.setSummary(summary);
+                m.setTags(tags);
+                m.setRelations(relations);
+            });
+            map().store();
         }
     }
 
     public void updateTags(String path, String tags) {
         FileMetadata metadata = findById(path);
         if (metadata != null) {
-            metadata.setTags(tags);
-            storage.store(metadata);
+            map().update(metadata, m -> m.setTags(tags));
+            map().store();
         }
     }
 
     public List<FileMetadata> findByTag(String tag) {
-        return store().values().stream()
+        return map().query(StorageRoot.FILE_PATH_INDEX.is(e -> e != null))
+                .toList()
+                .stream()
                 .filter(m -> m.getTags() != null && m.getTags().contains(tag))
                 .toList();
     }
 
     public void persist(FileMetadata metadata) {
-        store().put(metadata.getPath(), metadata);
-        storage.store(store());
+        FileMetadata existing = findById(metadata.getPath());
+        if (existing != null) {
+            map().update(existing, m -> {
+                m.setLastModified(metadata.getLastModified());
+                m.setSummary(metadata.getSummary());
+                m.setTags(metadata.getTags());
+                m.setRelations(metadata.getRelations());
+            });
+        } else {
+            map().add(metadata);
+        }
+        map().store();
     }
 
     public void deleteAll() {
-        store().clear();
-        storage.store(store());
+        map().query(StorageRoot.FILE_PATH_INDEX.is(e -> e != null)).toList().forEach(map()::remove);
+        map().store();
     }
 }

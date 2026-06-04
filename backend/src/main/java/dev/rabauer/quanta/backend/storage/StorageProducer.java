@@ -30,6 +30,12 @@ public class StorageProducer {
             storageManager.setRoot(storageRoot);
             storageManager.storeRoot();
         }
+        // storeRoot() assigns OIDs but the internal storingContext is only wired
+        // during loading (deserialization). One explicit storageManager.store() per
+        // GigaMap sets that back-reference so gigaMap.store() works on first run.
+        // On restart the GigaMaps are already connected; the extra store is harmless.
+        storageManager.store(storageRoot.getFileMetadata());
+        storageManager.store(storageRoot.getEmbeddings());
     }
 
     @Produces
