@@ -22,20 +22,31 @@ public class FilesResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/searchFiles")
     public List<FileMetadataDto> searchFiles(@QueryParam("prompt") String prompt) {
-        return retrievalService.findFiles(prompt);
+        return retrievalService.findFiles(requireNonBlank(prompt, "prompt"));
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/searchByTag")
     public List<FileMetadataDto> searchByTag(@QueryParam("tag") String tag) {
-        return retrievalService.findFilesByTag(tag);
+        return retrievalService.findFilesByTag(requireNonBlank(tag, "tag"));
     }
 
     @POST
     @Path("/updateTags")
     @Transactional
     public void updateTags(@QueryParam("path") String path, String tags) {
-        fileMetadataRepository.updateTags(path, tags);
+        String normalizedPath = requireNonBlank(path, "path");
+        boolean updated = fileMetadataRepository.updateTags(normalizedPath, tags);
+        if (!updated) {
+            throw new NotFoundException("No file metadata found for path: " + normalizedPath);
+        }
+    }
+
+    private String requireNonBlank(String value, String fieldName) {
+        if (value == null || value.isBlank()) {
+            throw new BadRequestException(fieldName + " must not be blank");
+        }
+        return value.trim();
     }
 }

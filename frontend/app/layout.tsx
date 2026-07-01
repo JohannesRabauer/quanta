@@ -2,7 +2,7 @@ import "./globals.css";
 
 export const metadata = {
   title: "Quanta - AI File Search",
-  description: "Search for files with a futuristic AI interface",
+  description: "Semantic local document search with summaries, tags, and related topics.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

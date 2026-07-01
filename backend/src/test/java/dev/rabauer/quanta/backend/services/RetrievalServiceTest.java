@@ -36,7 +36,7 @@ class RetrievalServiceTest {
     }
 
     private FileMetadata fileMetadata(String path, String summary, String tags, String relations) {
-        return new FileMetadata(path, 0L, summary, tags, relations);
+        return new FileMetadata(path, 1234L, summary, tags, relations);
     }
 
     @Test
@@ -49,7 +49,9 @@ class RetrievalServiceTest {
 
         assertEquals(1, result.size());
         FileMetadataDto dto = result.get(0);
+        assertEquals("report.pdf", dto.name());
         assertEquals("/docs/report.pdf", dto.path());
+        assertEquals(1234L, dto.lastModified());
         assertEquals("A report", dto.summary());
         assertEquals("finance", dto.tags());
     }

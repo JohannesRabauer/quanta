@@ -11,15 +11,7 @@ export default function ResultCard({
   isSelected,
   onSelect,
 }: ResultCardProps) {
-  const fileName = result.name.split(/[/\\]/).pop();
-
-  const formatFileSize = (bytes?: number) => {
-    if (!bytes) return "";
-    const kb = bytes / 1024;
-    if (kb < 1024) return `${kb.toFixed(1)} KB`;
-    const mb = kb / 1024;
-    return `${mb.toFixed(1)} MB`;
-  };
+  const fileName = result.name || result.path.split(/[/\\]/).pop() || result.path;
 
   const getFileIcon = (name?: string) => {
     const ext = name?.split(".").pop()?.toLowerCase();
@@ -81,11 +73,6 @@ export default function ResultCard({
           </div>
         </div>
 
-        {result.size && (
-          <div className="flex-shrink-0 text-[11px] text-gray-500 font-medium tabular-nums">
-            {formatFileSize(result.size)}
-          </div>
-        )}
       </div>
 
       {result.summary && (
