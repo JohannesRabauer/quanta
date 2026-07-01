@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useFileSearch } from "@/app/hooks/useFileSearch";
@@ -16,6 +16,7 @@ function SearchContent() {
     setQuery,
     results,
     loading,
+    error,
     editingPath,
     newTags,
     setNewTags,
@@ -29,7 +30,22 @@ function SearchContent() {
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
-  const hasNoResults = !loading && query && results.length === 0;
+  useEffect(() => {
+    if (results.length === 0) {
+      setSelectedPath(null);
+      return;
+    }
+
+    setSelectedPath((currentSelectedPath) => {
+      if (currentSelectedPath && results.some((result) => result.path === currentSelectedPath)) {
+        return currentSelectedPath;
+      }
+
+      return results[0].path;
+    });
+  }, [results]);
+
+  const hasNoResults = !loading && !error && query.trim().length > 0 && results.length === 0;
   const selectedResult = results.find((r) => r.path === selectedPath) || null;
 
   const handleSelectFile = (path: string) => {
@@ -95,8 +111,12 @@ function SearchContent() {
               query={query}
               onQueryChange={setQuery}
               onSearch={handleSearch}
+              loading={loading}
             />
           </motion.div>
+          <p className="mt-3 text-sm text-gray-500">
+            Semantic file search for local content, tags, and related topics.
+          </p>
         </div>
       </motion.header>
 
@@ -151,6 +171,22 @@ function SearchContent() {
                       />
                     </motion.div>
                   ))}
+                </motion.div>
+              )}
+
+              {!loading && error && (
+                <motion.div
+                  key="error"
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <div className="rounded-xl border border-rose-500/20 bg-rose-500/8 p-4 text-left">
+                    <p className="text-sm font-medium text-rose-200">
+                      Search unavailable
+                    </p>
+                    <p className="mt-1 text-xs text-rose-200/80">{error}</p>
+                  </div>
                 </motion.div>
               )}
 
@@ -215,7 +251,6 @@ function SearchContent() {
             >
               <MetadataPanel
                 result={selectedResult}
-                isCollapsed={isPanelCollapsed}
                 onToggleCollapse={handleTogglePanel}
                 isEditing={editingPath === selectedPath}
                 newTags={newTags}
@@ -228,6 +263,24 @@ function SearchContent() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {selectedResult && (
+          <div className="md:hidden border-t border-white/5 bg-white/[0.02]">
+            <MetadataPanel
+              result={selectedResult}
+              onToggleCollapse={handleTogglePanel}
+              isEditing={editingPath === selectedPath}
+              newTags={newTags}
+              onNewTagsChange={setNewTags}
+              onStartEditing={handleStartEditing}
+              onSaveTags={handleUpdateTags}
+              onCancelEditing={handleCancelEditing}
+              onTagClick={handleTagClick}
+              showCollapseButton={false}
+              className="h-auto"
+            />
+          </div>
+        )}
 
         {/* Collapsed Panel Button */}
         <AnimatePresence>

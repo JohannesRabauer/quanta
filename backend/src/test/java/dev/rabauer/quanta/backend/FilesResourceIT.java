@@ -43,7 +43,7 @@ class FilesResourceIT {
     @Test
     void searchFiles_returnsMatchingFiles() {
         persist(
-                new FileMetadata("/docs/report.pdf", 0L, "Annual report", "finance", ""),
+                new FileMetadata("/docs/report.pdf", 1234L, "Annual report", "finance", ""),
                 new FileMetadata("/docs/notes.txt", 0L, "Meeting notes", "work", "")
         );
         when(embeddingService.getSimilarFiles("report")).thenReturn(List.of("/docs/report.pdf"));
@@ -54,7 +54,9 @@ class FilesResourceIT {
                 .then()
                 .statusCode(200)
                 .body("$.size()", is(1))
+                .body("[0].name", is("report.pdf"))
                 .body("[0].path", is("/docs/report.pdf"))
+                .body("[0].lastModified", is(1234))
                 .body("[0].summary", is("Annual report"));
     }
 
@@ -107,6 +109,31 @@ class FilesResourceIT {
     }
 
     @Test
+    void searchFiles_returnsBadRequest_whenPromptIsBlank() {
+        given()
+                .queryParam("prompt", "   ")
+                .when().get("/searchFiles")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void searchByTag_matchesExactTags_caseInsensitively() {
+        persist(
+                new FileMetadata("/docs/invoice.pdf", 0L, "Invoice Q1", "Finance, Billing", ""),
+                new FileMetadata("/docs/cartography.txt", 0L, "Maps", "cartography", "")
+        );
+
+        given()
+                .queryParam("tag", "finance")
+                .when().get("/searchByTag")
+                .then()
+                .statusCode(200)
+                .body("$.size()", is(1))
+                .body("[0].path", is("/docs/invoice.pdf"));
+    }
+
+    @Test
     void searchByTag_returnsEmpty_whenNoFilesMatchTag() {
         persist(new FileMetadata("/docs/report.pdf", 0L, "Annual report", "finance", ""));
 
@@ -132,7 +159,17 @@ class FilesResourceIT {
         QuarkusTransaction.requiringNew().run(() -> {
             FileMetadata updated = fileMetadataRepository.findById("/docs/report.pdf");
             assert updated != null;
-            assert updated.getTags().equals("finance,updated");
+            assert updated.getTags().equals("finance, updated");
         });
+    }
+
+    @Test
+    void updateTags_returnsNotFound_whenFileDoesNotExist() {
+        given()
+                .queryParam("path", "/docs/missing.pdf")
+                .body("finance")
+                .when().post("/updateTags")
+                .then()
+                .statusCode(404);
     }
 }

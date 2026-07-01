@@ -7,9 +7,15 @@ interface SearchBarProps {
   query: string;
   onQueryChange: (value: string) => void;
   onSearch: () => void;
+  loading: boolean;
 }
 
-export default function SearchBar({ query, onQueryChange, onSearch }: SearchBarProps) {
+export default function SearchBar({
+  query,
+  onQueryChange,
+  onSearch,
+  loading,
+}: SearchBarProps) {
   const [isFocused, setIsFocused] = useState(false);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -17,7 +23,13 @@ export default function SearchBar({ query, onQueryChange, onSearch }: SearchBarP
   };
 
   return (
-    <div className="flex items-center gap-3">
+    <form
+      className="flex items-center gap-3"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSearch();
+      }}
+    >
       <motion.div
         className={`relative flex-1 rounded-xl transition-all duration-300 ${
           isFocused ? "glow-cyan" : ""
@@ -52,17 +64,19 @@ export default function SearchBar({ query, onQueryChange, onSearch }: SearchBarP
           placeholder="Search files by content, tags, or topics..."
           className="w-full pl-11 pr-4 py-3.5 text-sm rounded-xl bg-white/[0.04] text-white border border-white/[0.08] focus:border-cyan-500/50 focus:bg-white/[0.06] outline-none placeholder-gray-500 transition-all duration-200"
           autoFocus
+          aria-label="Search files"
         />
       </motion.div>
       <motion.button
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        onClick={onSearch}
-        className="px-6 py-3.5 rounded-xl font-medium bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white text-sm transition-all duration-200 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30 flex-shrink-0"
+        type="submit"
+        disabled={loading || !query.trim()}
+        className="px-6 py-3.5 rounded-xl font-medium bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 disabled:from-gray-700 disabled:to-gray-700 disabled:text-gray-400 disabled:shadow-none disabled:cursor-not-allowed text-white text-sm transition-all duration-200 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30 flex-shrink-0"
         aria-label="Search files"
       >
-        Search
+        {loading ? "Searching..." : "Search"}
       </motion.button>
-    </div>
+    </form>
   );
 }

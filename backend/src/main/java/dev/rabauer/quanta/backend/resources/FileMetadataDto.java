@@ -3,7 +3,7 @@ package dev.rabauer.quanta.backend.resources;
 public record FileMetadataDto(
         String name,
         String path,
-        String hash,
+        Long lastModified,
         String summary,
         String tags,
         String relations

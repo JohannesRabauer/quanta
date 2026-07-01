@@ -9,7 +9,6 @@ import EditTagsForm from "@/app/components/EditTagsForm";
 
 interface MetadataPanelProps {
   result: FileMetadata | null;
-  isCollapsed: boolean;
   onToggleCollapse: () => void;
   isEditing: boolean;
   newTags: string;
@@ -18,6 +17,8 @@ interface MetadataPanelProps {
   onSaveTags: (path: string) => void;
   onCancelEditing: () => void;
   onTagClick: (tag: string) => void;
+  showCollapseButton?: boolean;
+  className?: string;
 }
 
 export default function MetadataPanel({
@@ -30,10 +31,16 @@ export default function MetadataPanel({
   onSaveTags,
   onCancelEditing,
   onTagClick,
+  showCollapseButton = true,
+  className = "",
 }: MetadataPanelProps) {
   if (!result) {
     return (
-      <div className="h-full flex items-center justify-center text-gray-600 text-sm border-l border-white/5">
+      <div
+        className={`h-full flex items-center justify-center text-gray-600 text-sm ${
+          showCollapseButton ? "border-l border-white/5" : ""
+        } ${className}`}
+      >
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -63,24 +70,17 @@ export default function MetadataPanel({
     );
   }
 
-  const fileName = result.name.split(/[/\\]/).pop();
+  const fileName = result.name || result.path.split(/[/\\]/).pop() || result.path;
   const tags = parseList(result.tags);
   const relations = parseList(result.relations);
+  const fileExtension = fileName.includes(".")
+    ? fileName.split(".").pop()?.toUpperCase()
+    : "Unknown";
 
-  const formatFileSize = (bytes?: number) => {
-    if (!bytes) return "N/A";
-    const kb = bytes / 1024;
-    if (kb < 1024) return `${kb.toFixed(2)} KB`;
-    const mb = kb / 1024;
-    if (mb < 1024) return `${mb.toFixed(2)} MB`;
-    const gb = mb / 1024;
-    return `${gb.toFixed(2)} GB`;
-  };
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "N/A";
+  const formatDate = (timestamp?: number | null) => {
+    if (!timestamp) return "N/A";
     try {
-      const date = new Date(dateString);
+      const date = new Date(timestamp);
       return date.toLocaleDateString("en-US", {
         year: "numeric",
         month: "short",
@@ -89,37 +89,37 @@ export default function MetadataPanel({
         minute: "2-digit",
       });
     } catch {
-      return dateString;
+      return "N/A";
     }
   };
 
   const infoItems = [
-    { label: "Size", value: formatFileSize(result.size) },
-    { label: "Modified", value: formatDate(result.last_modified) },
-    {
-      label: "Hash",
-      value: result.hash ? `${result.hash.substring(0, 12)}...` : "N/A",
-      title: result.hash,
-      mono: true,
-    },
+    { label: "Type", value: fileExtension || "Unknown", mono: true },
+    { label: "Modified", value: formatDate(result.lastModified) },
   ];
 
   return (
-    <div className="h-full flex flex-col bg-white/[0.01] border-l border-white/5">
+    <div
+      className={`h-full flex flex-col bg-white/[0.01] ${
+        showCollapseButton ? "border-l border-white/5" : ""
+      } ${className}`}
+    >
       {/* Header */}
       <div className="flex-shrink-0 px-5 py-4 border-b border-white/5 flex items-center justify-between">
         <h2 className="text-xs font-semibold text-cyan-400/80 uppercase tracking-widest">
           File Details
         </h2>
-        <button
-          onClick={onToggleCollapse}
-          className="text-gray-500 hover:text-cyan-400 transition-colors p-1.5 rounded-lg hover:bg-white/[0.04]"
-          aria-label="Collapse panel"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-          </svg>
-        </button>
+        {showCollapseButton && (
+          <button
+            onClick={onToggleCollapse}
+            className="text-gray-500 hover:text-cyan-400 transition-colors p-1.5 rounded-lg hover:bg-white/[0.04]"
+            aria-label="Collapse panel"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Scrollable Content */}
@@ -166,7 +166,7 @@ export default function MetadataPanel({
                   <span className="text-xs text-gray-500">{item.label}</span>
                   <span
                     className={`text-xs text-gray-300 ${item.mono ? "font-mono" : "font-medium"}`}
-                    title={item.title}
+                    title={item.value}
                   >
                     {item.value}
                   </span>

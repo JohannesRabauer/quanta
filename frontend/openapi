@@ -1,57 +1,103 @@
 ---
 openapi: 3.1.0
+info:
+  title: Quanta backend API
+  version: 1.0.0-SNAPSHOT
 components:
   schemas:
     FileMetadata:
       type: object
+      required:
+        - name
+        - path
       properties:
         name:
           type: string
         path:
           type: string
-        hash:
-          type: string
+        lastModified:
+          type:
+            - integer
+            - "null"
+          format: int64
         summary:
-          type: string
+          type:
+            - string
+            - "null"
+        tags:
+          type:
+            - string
+            - "null"
+        relations:
+          type:
+            - string
+            - "null"
 paths:
-  /fileSummary:
-    post:
-      requestBody:
-        content:
-          text/plain:
-            schema:
-              type: string
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/FileMetadata"
-      summary: Get File Summary
-      tags:
-      - Files Resource
   /searchFiles:
-    post:
-      requestBody:
-        content:
-          text/plain:
-            schema:
-              type: string
-        required: true
+    get:
+      summary: Search files semantically
+      tags:
+        - Files Resource
+      parameters:
+        - name: prompt
+          in: query
+          required: true
+          schema:
+            type: string
       responses:
         "200":
-          description: OK
+          description: Matching files
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: "#/components/schemas/FileMetadata"
-      summary: Search Files
+        "400":
+          description: Blank prompt
+  /searchByTag:
+    get:
+      summary: Search files by tag
       tags:
-      - Files Resource
-info:
-  title: backend API
-  version: 1.0.0-SNAPSHOT
+        - Files Resource
+      parameters:
+        - name: tag
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Matching files
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FileMetadata"
+        "400":
+          description: Blank tag
+  /updateTags:
+    post:
+      summary: Update tags for a file
+      tags:
+        - Files Resource
+      parameters:
+        - name: path
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        "204":
+          description: Tags updated
+        "400":
+          description: Blank path
+        "404":
+          description: File metadata not found

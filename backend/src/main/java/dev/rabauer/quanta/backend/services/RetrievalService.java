@@ -6,6 +6,8 @@ import dev.rabauer.quanta.backend.storage.FileMetadataRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,13 +41,28 @@ public class RetrievalService {
     }
 
     private FileMetadataDto entityToDto(FileMetadata fileMetadata) {
+        String path = fileMetadata.getPath();
         return new FileMetadataDto(
-                fileMetadata.getPath(),
-                fileMetadata.getPath(),
-                "",
+                extractFileName(path),
+                path,
+                fileMetadata.getLastModified(),
                 fileMetadata.getSummary(),
                 fileMetadata.getTags(),
                 fileMetadata.getRelations()
         );
+    }
+
+    private String extractFileName(String path) {
+        if (path == null || path.isBlank()) {
+            return "";
+        }
+
+        try {
+            Path filePath = Path.of(path);
+            Path fileName = filePath.getFileName();
+            return fileName != null ? fileName.toString() : path;
+        } catch (InvalidPathException ignored) {
+            return path;
+        }
     }
 }
