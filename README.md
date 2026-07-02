@@ -22,7 +22,7 @@ flowchart TD
         API[REST Endpoints]
         Service[Service Layer]
         Vector[Vector Store Connector]
-        LLM[Ollama Connector]
+        LLM[LLM Connector]
         
         API --> Service
         Service --> Vector
@@ -33,8 +33,8 @@ flowchart TD
         PG[(Embeddings + Metadata)]
     end
 
-    subgraph AI [Ollama Container]
-        Model[(LLaMA3.2 or local model)]
+    subgraph AI [AI Provider: Ollama or OpenAI]
+        Model[(Chat Model)]
         Embed[(Embeddings Model)]
         Model <---> Embed
     end
@@ -65,8 +65,6 @@ flowchart TD
     subgraph AI [Ollama Container]
         EmbedModel[(Embeddings Model)]
     end
-
-    FW --> Hash
     Hash -->|Check hash exists?| Meta
     Meta -->|No or Changed| Chunk[Split file into chunks]
     Chunk --> EmbedModel
@@ -78,21 +76,36 @@ flowchart TD
 
 ## 🚀 Quick start
 
-All you need to start the whole system (it will compile the Java backend and the Next.js frontend and start all required services) is:
+The system supports two AI providers: **Ollama** (local models, no API key needed) and **OpenAI**.
+A base `docker-compose.yml` holds the shared services (db, backend, frontend); provider-specific
+overrides add the rest.
+
+### With Ollama (local models)
 
 ```powershell
-docker compose up
+docker compose -f docker-compose.yml -f docker-compose.ollama.yml up
 ```
 
-This will build and run the backend, frontend, database, and the Ollama service defined in `docker-compose.yml`.
+Starts the backend, frontend, database, and a local Ollama container with the configured models.
 
-If you're actively developing the backend and want to start the other services without building or running the backend container, use the development shortcut:
+### With OpenAI
+
+Make sure `OPENAI_API_KEY` is set in your shell, then:
 
 ```powershell
-docker compose up --scale backend=0
+docker compose -f docker-compose.yml -f docker-compose.openai.yml up
 ```
 
-This brings up the database, frontend, and Ollama containers while leaving the backend scaled down so you can run the backend locally from your IDE instead of inside Docker.
+No Ollama container is started. The backend uses `gpt-4o-mini` for chat and `text-embedding-3-small` for embeddings.
+
+> ⚠️ Switching providers clears the vector store (different embedding dimensions). Re-ingestion happens automatically on the next startup.
+
+If you're actively developing the backend and want to start the other services without building or running the backend container, add `--scale backend=0`:
+
+```powershell
+# Example for Ollama profile
+docker compose -f docker-compose.yml -f docker-compose.ollama.yml up --scale backend=0
+```
 
 ## 🔎 Purpose
 
@@ -101,16 +114,16 @@ Quanta (ai-file-search) is a local-first document search and retrieval system th
 - Watches a configured folder for new/changed files.
 - Chunks documents, computes embeddings, and stores vectors + metadata in PostgreSQL (with pgvector).
 - Exposes a REST API (Quarkus + Langchain4j) used by a Next.js frontend to perform semantic search and interactive queries.
-- Runs a local LLM and embedding model inside an Ollama container so the stack can work without cloud services.
+- Supports **Ollama** (local models, fully offline) and **OpenAI** as interchangeable AI providers.
 
 This repository contains the full-stack pieces (frontend, backend, database, and an Ollama container) and example init scripts for local use.
 
 ## 📌 Current status
 
-- Backend: Quarkus-based service with watch/ingest, vector connector, and Ollama integration — actively maintained.
+- Backend: Quarkus-based service with watch/ingest, vector connector, and Langchain4j integration — actively maintained.
 - Frontend: Next.js app (app router) with a minimal UI to perform searches and display results.
 - Database: PostgreSQL with pgvector. Example data/init scripts are in `db/`.
-- AI: Local Ollama container orchestrated through Docker compose; swap-in external models if desired.
+- AI: Ollama (local container) or OpenAI — switchable via Docker Compose overlay or Quarkus profile.
 
 Status: development — the core features (ingestion, embedding, vector storage, query) are implemented. Expect ongoing improvements and occasional breaking changes on the `main` branch.
 
@@ -128,20 +141,29 @@ The project is designed to be runnable with Docker Compose for a quick start, or
 
 ### Backend (Quarkus) — run from your IDE
 
-1. Build & run locally (uses the project `mvnw` wrapper):
+1. Build & run locally with Ollama (default):
 
 ```powershell
 cd backend
 ./mvnw quarkus:dev
 ```
 
+Or with OpenAI (make sure `OPENAI_API_KEY` is set):
+
+```powershell
+cd backend
+./mvnw quarkus:dev -Dquarkus.profile=openai
+```
+
 2. When running locally you can start the rest of the stack without the backend container:
 
 ```powershell
-docker compose up --scale backend=0
-```
+# Ollama
+docker compose -f docker-compose.yml -f docker-compose.ollama.yml up --scale backend=0
 
-This starts PostgreSQL, Ollama, and the frontend. The backend running on `localhost:8080` will be used by the frontend.
+# OpenAI (no Ollama container needed)
+docker compose -f docker-compose.yml -f docker-compose.openai.yml up --scale backend=0
+```
 
 ### Frontend (Next.js)
 
@@ -161,25 +183,23 @@ The `db/` folder includes a Dockerfile and initialization SQL; `docker compose u
 
 ## 🐳 Docker Compose notes
 
-- Quick start (builds and runs everything):
+| Command | Provider |
+|---|---|
+| `docker compose -f docker-compose.yml -f docker-compose.ollama.yml up` | Ollama (local) |
+| `docker compose -f docker-compose.yml -f docker-compose.openai.yml up` | OpenAI |
 
-```powershell
-docker compose up --build
-```
-
-- Scale down the backend to work on it locally:
-
-```powershell
-docker compose up --scale backend=0
-```
-
-- If you change models or Ollama settings, rebuild or restart the Ollama service to pick up configuration changes.
+- Add `--build` to rebuild images after code changes.
+- Add `--scale backend=0` to skip the backend container and run it locally instead.
+- If you change models or Ollama settings, restart the Ollama service to pick up configuration changes.
 
 ## ⚙️ Environment variables
 
-The services read environment variables from the compose file and the container environments. Key values include database connection strings, Ollama host/port, and any API keys you may configure for optional external services.
+| Variable | Used by | Description |
+|---|---|---|
+| `OPENAI_API_KEY` | Backend (OpenAI profile) | Your OpenAI API key |
+| `QUARKUS_PROFILE` | Backend | Set to `openai` to use OpenAI; omit for Ollama (default) |
 
-Check `backend/src/main/resources/application.properties` for backend-specific configuration keys and default values.
+All other configuration (DB connection, Ollama URL, model names) is handled via `docker-compose.*.yml` overlays or `backend/src/main/resources/application.properties`.
 
 ## 🚨 Troubleshooting
 
@@ -201,12 +221,3 @@ Contributions are welcome. If you plan to add features or fix bugs:
 ## License
 
 See the repository root for license details (if none present, assume an open-source-friendly license will be added soon).
-
----
-
-If you want, I can also:
-
-- Add a short `DEVELOPMENT.md` that collects the commands above as copy-paste snippets.
-- Add a troubleshooting section that includes common `docker` / `psql` commands to inspect containers and DB state.
-
-Tell me which extras you'd like and I'll add them.

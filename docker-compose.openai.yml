@@ -1,0 +1,5 @@
+services:
+  backend:
+    environment:
+      - QUARKUS_PROFILE=openai
+      - OPENAI_API_KEY=${OPENAI_API_KEY}

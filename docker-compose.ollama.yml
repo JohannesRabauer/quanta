@@ -1,0 +1,26 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-quanta
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./ollama/data:/root/.ollama
+      - ./ollama/init:/init
+    environment:
+      - OLLAMA_KEEP_ALIVE=-1
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+    entrypoint: [ "/bin/sh", "/init/run_ollama.sh" ]
+
+  backend:
+    depends_on:
+      ollama:
+        condition: service_started
+    environment:
+      - QUARKUS_LANGCHAIN4J_OLLAMA_BASE-URL=http://ollama-quanta:11434
