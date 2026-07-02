@@ -1,4 +1,4 @@
-import { FileMetadata } from "@/app/types";
+import { FileMetadata, ChatMessage, ChatApiResponse } from "@/app/types";
 
 const API_BASE_URL =
   (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080").replace(/\/$/, "");
@@ -45,4 +45,17 @@ export async function updateFileTags(
   if (!response.ok) {
     throw new Error(await readErrorMessage(response, "Tag update failed"));
   }
+}
+
+export async function sendChatMessage(messages: ChatMessage[]): Promise<ChatApiResponse> {
+  const response = await fetch(`${API_BASE_URL}/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages: messages.map(({ role, content }) => ({ role, content })) }),
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    throw new Error(await readErrorMessage(response, "Chat request failed"));
+  }
+  return response.json();
 }

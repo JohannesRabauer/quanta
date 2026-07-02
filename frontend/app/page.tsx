@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useFileSearch } from "@/app/hooks/useFileSearch";
 import SearchBar from "@/app/components/SearchBar";
@@ -75,31 +76,48 @@ function SearchContent() {
         className="flex-shrink-0 relative z-10 border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl"
       >
         <div className="max-w-screen-2xl mx-auto px-6 py-5">
-          <div className="flex items-center gap-3 mb-5">
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-3">
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                <Image
+                  src="/logo.png"
+                  alt="Quanta Logo"
+                  width={36}
+                  height={36}
+                  style={{
+                    filter: "invert(1) hue-rotate(180deg) drop-shadow(0 0 10px rgba(6,182,212,0.6))",
+                  }}
+                  className="opacity-90"
+                />
+              </motion.div>
+              <motion.h1
+                initial={{ x: -10, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-cyan-300 bg-clip-text text-transparent tracking-wide"
+              >
+                Quanta
+              </motion.h1>
+            </div>
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
             >
-              <Image
-                src="/logo.png"
-                alt="Quanta Logo"
-                width={36}
-                height={36}
-                style={{
-                  filter: "invert(1) hue-rotate(180deg) drop-shadow(0 0 10px rgba(6,182,212,0.6))",
-                }}
-                className="opacity-90"
-              />
+              <Link
+                href="/chat"
+                className="flex items-center gap-2 text-sm text-gray-400 hover:text-cyan-400 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                Chat
+              </Link>
             </motion.div>
-            <motion.h1
-              initial={{ x: -10, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-cyan-300 bg-clip-text text-transparent tracking-wide"
-            >
-              Quanta
-            </motion.h1>
           </div>
 
           <motion.div
